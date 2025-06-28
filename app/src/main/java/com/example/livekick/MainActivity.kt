@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import com.example.livekick.presentation.LiveKickApp
 import com.example.livekick.ui.theme.LiveKickTheme
 import dagger.hilt.android.AndroidEntryPoint
 
