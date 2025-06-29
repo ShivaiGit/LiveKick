@@ -32,7 +32,6 @@ fun NavGraph(
         
         composable(Screen.Favorites.route) {
             FavoritesScreen(
-                matches = emptyList(), // Временно пустой список, будет подключен ViewModel
                 onMatchClick = { matchId ->
                     navController.navigate(Screen.MatchDetail.createRoute(matchId))
                 },

@@ -1,7 +1,9 @@
 package com.example.livekick.presentation.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.livekick.data.repository.MatchRepositoryImpl
 import com.example.livekick.domain.model.Match
 import com.example.livekick.domain.repository.MatchRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,8 +12,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class FavoritesViewModel(
-    private val matchRepository: MatchRepository
+    private val context: Context
 ) : ViewModel() {
+    
+    private val matchRepository: MatchRepository = MatchRepositoryImpl(context)
     
     private val _uiState = MutableStateFlow(FavoritesUiState())
     val uiState: StateFlow<FavoritesUiState> = _uiState.asStateFlow()
@@ -45,12 +49,18 @@ class FavoritesViewModel(
         viewModelScope.launch {
             try {
                 matchRepository.toggleFavorite(matchId)
+                // Перезагружаем список после изменения
+                loadFavoriteMatches()
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     error = e.message ?: "Ошибка обновления избранного"
                 )
             }
         }
+    }
+    
+    fun refreshFavorites() {
+        loadFavoriteMatches()
     }
     
     fun clearError() {

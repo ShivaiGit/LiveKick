@@ -136,7 +136,9 @@ class MatchRepositoryImpl(
                 
                 // Добавляем статус избранного к матчам
                 val matchesWithFavorites = matchesToShow.map { match ->
-                    match.copy(isFavorite = false) // Будет обновлено из локальной БД
+                    // Получаем статус избранного из локальной БД
+                    val localMatch = localRepository.getMatchById(match.id)
+                    match.copy(isFavorite = localMatch?.isFavorite ?: false)
                 }
                 
                 Log.d("LiveKick", "Отправляем ${matchesWithFavorites.size} матчей в UI")
