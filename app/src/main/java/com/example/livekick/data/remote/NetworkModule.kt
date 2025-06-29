@@ -8,13 +8,24 @@ import java.util.concurrent.TimeUnit
 
 object NetworkModule {
     
-    // API AllSportsApi
-    private const val BASE_URL = "https://apiv3.apifootball.com/"
+    // API SportDevs
+    private const val BASE_URL = "https://football.sportdevs.com/"
+    private const val API_KEY = "iMuRG7tk5kS0bQl-g2z4YQ"
     
     private val okHttpClient = OkHttpClient.Builder()
         .addInterceptor(HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         })
+        .addInterceptor { chain ->
+            val original = chain.request()
+            val url = original.url.newBuilder()
+                .addQueryParameter("api_token", API_KEY)
+                .build()
+            val request = original.newBuilder()
+                .url(url)
+                .build()
+            chain.proceed(request)
+        }
         .connectTimeout(30, TimeUnit.SECONDS)
         .readTimeout(30, TimeUnit.SECONDS)
         .writeTimeout(30, TimeUnit.SECONDS)

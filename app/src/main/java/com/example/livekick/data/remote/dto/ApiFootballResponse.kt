@@ -2,125 +2,126 @@ package com.example.livekick.data.remote.dto
 
 import com.google.gson.annotations.SerializedName
 
-data class ApiFootballResponse(
-    val result: List<MatchResponse>? = null,
-    val error: Int? = null,
-    val message: String? = null
-)
+// Для прямых массивов матчей (API возвращает массив напрямую)
+typealias ApiFootballResponse = List<MatchResponse>
 
 data class MatchResponse(
-    @SerializedName("match_id")
-    val matchId: String,
-    @SerializedName("country_id")
-    val countryId: String,
-    @SerializedName("country_name")
-    val countryName: String,
-    @SerializedName("league_id")
-    val leagueId: String,
-    @SerializedName("league_name")
-    val leagueName: String,
-    @SerializedName("match_date")
-    val matchDate: String,
-    @SerializedName("match_status")
-    val matchStatus: String,
-    @SerializedName("match_time")
-    val matchTime: String,
-    @SerializedName("match_hometeam_id")
-    val homeTeamId: String,
-    @SerializedName("match_hometeam_name")
-    val homeTeamName: String,
-    @SerializedName("match_hometeam_score")
-    val homeTeamScore: String,
-    @SerializedName("match_awayteam_id")
-    val awayTeamId: String,
-    @SerializedName("match_awayteam_name")
-    val awayTeamName: String,
-    @SerializedName("match_awayteam_score")
-    val awayTeamScore: String,
-    @SerializedName("match_hometeam_halftime_score")
-    val homeTeamHalftimeScore: String,
-    @SerializedName("match_awayteam_halftime_score")
-    val awayTeamHalftimeScore: String,
-    @SerializedName("match_hometeam_extra_score")
-    val homeTeamExtraScore: String?,
-    @SerializedName("match_awayteam_extra_score")
-    val awayTeamExtraScore: String?,
-    @SerializedName("match_hometeam_penalty_score")
-    val homeTeamPenaltyScore: String?,
-    @SerializedName("match_awayteam_penalty_score")
-    val awayTeamPenaltyScore: String?,
-    @SerializedName("match_hometeam_ft_score")
-    val homeTeamFtScore: String?,
-    @SerializedName("match_awayteam_ft_score")
-    val awayTeamFtScore: String?,
-    @SerializedName("match_hometeam_system")
-    val homeTeamSystem: String?,
-    @SerializedName("match_awayteam_system")
-    val awayTeamSystem: String?,
-    @SerializedName("match_live")
-    val matchLive: String,
-    @SerializedName("match_round")
-    val matchRound: String?,
-    @SerializedName("match_stadium")
-    val matchStadium: String?,
-    @SerializedName("match_referee")
-    val matchReferee: String?,
-    @SerializedName("team_home_badge")
-    val homeTeamBadge: String?,
-    @SerializedName("team_away_badge")
-    val awayTeamBadge: String?,
-    @SerializedName("league_logo")
-    val leagueLogo: String?,
-    @SerializedName("country_logo")
-    val countryLogo: String?,
-    @SerializedName("league_year")
-    val leagueYear: String?,
-    @SerializedName("fko")
-    val fko: String?,
-    @SerializedName("match_ht_score")
-    val matchHtScore: String?,
-    @SerializedName("match_ft_score")
-    val matchFtScore: String?,
-    @SerializedName("match_et_score")
-    val matchEtScore: String?,
-    @SerializedName("match_ps_score")
-    val matchPsScore: String?
+    @SerializedName("id")
+    val id: Int,
+    @SerializedName("referee")
+    val referee: String?,
+    @SerializedName("timezone")
+    val timezone: String,
+    @SerializedName("date")
+    val date: String,
+    @SerializedName("timestamp")
+    val timestamp: Int,
+    @SerializedName("periods")
+    val periods: Periods?,
+    @SerializedName("venue")
+    val venue: Venue?,
+    @SerializedName("status")
+    val status: Status,
+    @SerializedName("league")
+    val league: LeagueResponse,
+    @SerializedName("country")
+    val country: CountryResponse,
+    @SerializedName("teams")
+    val teams: Teams,
+    @SerializedName("goals")
+    val goals: Goals,
+    @SerializedName("score")
+    val score: Score
 )
 
-// Для ответов с лигами
+data class Periods(
+    @SerializedName("first")
+    val first: Int?,
+    @SerializedName("second")
+    val second: Int?
+)
+
+data class Venue(
+    @SerializedName("id")
+    val id: Int?,
+    @SerializedName("name")
+    val name: String?,
+    @SerializedName("city")
+    val city: String?
+)
+
+data class Status(
+    @SerializedName("long")
+    val long: String,
+    @SerializedName("short")
+    val short: String,
+    @SerializedName("elapsed")
+    val elapsed: Int?
+)
+
 data class LeagueResponse(
-    val result: List<LeagueData>? = null,
-    val error: Int? = null,
-    val message: String? = null
+    @SerializedName("id")
+    val id: Int,
+    @SerializedName("name")
+    val name: String,
+    @SerializedName("country")
+    val country: String,
+    @SerializedName("logo")
+    val logo: String?,
+    @SerializedName("flag")
+    val flag: String?,
+    @SerializedName("season")
+    val season: Int,
+    @SerializedName("round")
+    val round: String?
 )
 
-data class LeagueData(
-    @SerializedName("league_id")
-    val leagueId: String,
-    @SerializedName("league_name")
-    val leagueName: String,
-    @SerializedName("country_id")
-    val countryId: String,
-    @SerializedName("country_name")
-    val countryName: String,
-    @SerializedName("league_logo")
-    val leagueLogo: String?,
-    @SerializedName("country_logo")
-    val countryLogo: String?
-)
-
-// Для ответов со странами
 data class CountryResponse(
-    val result: List<CountryData>? = null,
-    val error: Int? = null,
-    val message: String? = null
+    @SerializedName("name")
+    val name: String,
+    @SerializedName("code")
+    val code: String?,
+    @SerializedName("flag")
+    val flag: String?
 )
 
-data class CountryData(
-    @SerializedName("country_id")
-    val countryId: String,
-    @SerializedName("country_name")
-    val countryName: String,
-    @SerializedName("country_logo")
-    val countryLogo: String?
+data class Teams(
+    @SerializedName("home")
+    val home: TeamResponse,
+    @SerializedName("away")
+    val away: TeamResponse
+)
+
+data class TeamResponse(
+    @SerializedName("id")
+    val id: Int,
+    @SerializedName("name")
+    val name: String,
+    @SerializedName("logo")
+    val logo: String?
+)
+
+data class Goals(
+    @SerializedName("home")
+    val home: Int?,
+    @SerializedName("away")
+    val away: Int?
+)
+
+data class Score(
+    @SerializedName("halftime")
+    val halftime: ScoreDetail?,
+    @SerializedName("fulltime")
+    val fulltime: ScoreDetail?,
+    @SerializedName("extratime")
+    val extratime: ScoreDetail?,
+    @SerializedName("penalty")
+    val penalty: ScoreDetail?
+)
+
+data class ScoreDetail(
+    @SerializedName("home")
+    val home: Int?,
+    @SerializedName("away")
+    val away: Int?
 ) 

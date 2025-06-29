@@ -6,29 +6,37 @@ import retrofit2.http.Query
 
 interface ApiFootballService {
     
-    @GET("?APIkey=f81675edfc5e8e89f8a387158f1fc5dcdc34126b3b8deaa664d206019c0ba65d&action=get_live")
+    // Live матчи
+    @GET("api/v1/lives")
     suspend fun getLiveMatches(): ApiFootballResponse
     
-    @GET("?APIkey=f81675edfc5e8e89f8a387158f1fc5dcdc34126b3b8deaa664d206019c0ba65d&action=get_events")
+    // Матчи по дате
+    @GET("api/v1/fixtures")
     suspend fun getMatchesByDate(
-        @Query("from") dateFrom: String,
-        @Query("to") dateTo: String
+        @Query("date") date: String
     ): ApiFootballResponse
     
-    @GET("?APIkey=f81675edfc5e8e89f8a387158f1fc5dcdc34126b3b8deaa664d206019c0ba65d&action=get_events")
+    // Матч по ID
+    @GET("api/v1/fixtures/{id}")
     suspend fun getMatchById(
-        @Query("match_id") matchId: String
+        @Query("id") matchId: String
     ): ApiFootballResponse
     
-    @GET("?APIkey=f81675edfc5e8e89f8a387158f1fc5dcdc34126b3b8deaa664d206019c0ba65d&action=get_events")
+    // Матчи по лиге
+    @GET("api/v1/fixtures")
     suspend fun getMatchesByLeague(
         @Query("league_id") leagueId: String
     ): ApiFootballResponse
     
-    @GET("?APIkey=f81675edfc5e8e89f8a387158f1fc5dcdc34126b3b8deaa664d206019c0ba65d&action=get_leagues")
+    // Лиги
+    @GET("api/v1/leagues")
     suspend fun getLeagues(): ApiFootballResponse
     
+    // Страны
+    @GET("api/v1/countries")
+    suspend fun getCountries(): ApiFootballResponse
+    
     // Тестовый эндпоинт для проверки API
-    @GET("?APIkey=f81675edfc5e8e89f8a387158f1fc5dcdc34126b3b8deaa664d206019c0ba65d&action=get_countries")
+    @GET("api/v1/countries")
     suspend fun testApi(): ApiFootballResponse
 } 

@@ -25,10 +25,20 @@ class MatchRepositoryImpl(
     suspend fun testApiConnection() {
         try {
             Log.d("LiveKick", "=== ТЕСТИРОВАНИЕ API ПОДКЛЮЧЕНИЯ ===")
+            Log.d("LiveKick", "URL: https://football.sportdevs.com/")
+            Log.d("LiveKick", "API Key: iMuRG7tk5kS0bQl-g2z4YQ")
+            
             val response = apiService.testApi()
             Log.d("LiveKick", "API тест успешен: ${response}")
+            Log.d("LiveKick", "Результат: ${response.size} стран")
+            
         } catch (e: Exception) {
             Log.e("LiveKick", "API тест провален: ${e.message}", e)
+            Log.e("LiveKick", "Тип ошибки: ${e.javaClass.simpleName}")
+            if (e is retrofit2.HttpException) {
+                Log.e("LiveKick", "HTTP код: ${e.code()}")
+                Log.e("LiveKick", "HTTP сообщение: ${e.message()}")
+            }
         }
     }
     
@@ -43,13 +53,24 @@ class MatchRepositoryImpl(
                 try {
                     Log.d("LiveKick", "Запрашиваем live матчи...")
                     val liveResponse = apiService.getLiveMatches()
-                    liveResponse.result?.let { matchList ->
-                        val matches = ApiFootballMapper.mapMatchResponseListToMatches(matchList)
+                    Log.d("LiveKick", "Live матчи ответ получен: ${liveResponse}")
+                    Log.d("LiveKick", "Количество матчей: ${liveResponse.size}")
+                    
+                    if (liveResponse.isNotEmpty()) {
+                        Log.d("LiveKick", "Первый матч: ${liveResponse.first()}")
+                        val matches = ApiFootballMapper.mapMatchResponseListToMatches(liveResponse)
                         liveMatches.addAll(matches)
                         Log.d("LiveKick", "Live матчи: ${matches.size}")
+                    } else {
+                        Log.w("LiveKick", "Список live матчей пустой")
                     }
                 } catch (e: Exception) {
-                    Log.e("LiveKick", "Ошибка получения live матчей: ${e.message}")
+                    Log.e("LiveKick", "Ошибка получения live матчей: ${e.message}", e)
+                    Log.e("LiveKick", "Тип ошибки: ${e.javaClass.simpleName}")
+                    if (e is retrofit2.HttpException) {
+                        Log.e("LiveKick", "HTTP код: ${e.code()}")
+                        Log.e("LiveKick", "HTTP сообщение: ${e.message()}")
+                    }
                 }
                 
                 // Если нет live матчей, получаем сегодняшние матчи
@@ -58,11 +79,10 @@ class MatchRepositoryImpl(
                         Log.d("LiveKick", "Запрашиваем сегодняшние матчи...")
                         val today = LocalDate.now()
                         val todayResponse = apiService.getMatchesByDate(
-                            dateFrom = today.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-                            dateTo = today.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                            date = today.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
                         )
-                        todayResponse.result?.let { matchList ->
-                            val matches = ApiFootballMapper.mapMatchResponseListToMatches(matchList)
+                        if (todayResponse.isNotEmpty()) {
+                            val matches = ApiFootballMapper.mapMatchResponseListToMatches(todayResponse)
                             liveMatches.addAll(matches)
                             Log.d("LiveKick", "Сегодняшние матчи: ${matches.size}")
                         }
@@ -77,11 +97,10 @@ class MatchRepositoryImpl(
                         Log.d("LiveKick", "Запрашиваем завтрашние матчи...")
                         val tomorrow = LocalDate.now().plusDays(1)
                         val tomorrowResponse = apiService.getMatchesByDate(
-                            dateFrom = tomorrow.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-                            dateTo = tomorrow.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                            date = tomorrow.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
                         )
-                        tomorrowResponse.result?.let { matchList ->
-                            val matches = ApiFootballMapper.mapMatchResponseListToMatches(matchList)
+                        if (tomorrowResponse.isNotEmpty()) {
+                            val matches = ApiFootballMapper.mapMatchResponseListToMatches(tomorrowResponse)
                             liveMatches.addAll(matches)
                             Log.d("LiveKick", "Завтрашние матчи: ${matches.size}")
                         }
@@ -155,9 +174,11 @@ class MatchRepositoryImpl(
     override fun getMatchesByLeague(leagueId: String): Flow<List<Match>> = flow {
         try {
             val response = apiService.getMatchesByLeague(leagueId)
-            val matches = response.result?.let { matchList ->
-                ApiFootballMapper.mapMatchResponseListToMatches(matchList)
-            } ?: emptyList()
+            val matches = if (response.isNotEmpty()) {
+                ApiFootballMapper.mapMatchResponseListToMatches(response)
+            } else {
+                emptyList()
+            }
             
             val matchesWithFavorites = matches.map { match ->
                 match.copy(isFavorite = false)
@@ -173,8 +194,10 @@ class MatchRepositoryImpl(
     override fun getMatchById(matchId: String): Flow<Match?> = flow {
         try {
             val response = apiService.getMatchById(matchId)
-            val match = response.result?.firstOrNull()?.let { matchResponse ->
-                ApiFootballMapper.mapMatchResponseToMatch(matchResponse)
+            val match = if (response.isNotEmpty()) {
+                ApiFootballMapper.mapMatchResponseToMatch(response.first())
+            } else {
+                null
             }
             
             val matchWithFavorite = match?.copy(isFavorite = false)
