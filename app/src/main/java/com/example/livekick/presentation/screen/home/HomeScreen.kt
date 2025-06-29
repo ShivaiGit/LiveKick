@@ -1,5 +1,6 @@
 package com.example.livekick.presentation.screen.home
 
+import android.content.Context
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -23,7 +24,8 @@ import com.example.livekick.presentation.viewmodel.HomeViewModel
 @Composable
 fun HomeScreen(
     navController: NavController,
-    viewModel: HomeViewModel = viewModel()
+    context: Context,
+    viewModel: HomeViewModel = viewModel { HomeViewModel(context) }
 ) {
     val uiState by viewModel.uiState.collectAsState()
     

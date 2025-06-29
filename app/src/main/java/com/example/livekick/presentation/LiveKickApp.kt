@@ -1,5 +1,6 @@
 package com.example.livekick.presentation
 
+import android.content.Context
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -12,7 +13,7 @@ import com.example.livekick.presentation.screen.home.HomeScreen
 import com.example.livekick.ui.theme.LiveKickTheme
 
 @Composable
-fun LiveKickApp() {
+fun LiveKickApp(context: Context) {
     LiveKickTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),
@@ -25,7 +26,7 @@ fun LiveKickApp() {
                 startDestination = "home"
             ) {
                 composable("home") {
-                    HomeScreen(navController = navController)
+                    HomeScreen(navController = navController, context = context)
                 }
             }
         }

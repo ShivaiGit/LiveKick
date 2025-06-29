@@ -1,5 +1,6 @@
 package com.example.livekick.presentation.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.livekick.data.repository.MatchRepositoryImpl
@@ -11,10 +12,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class HomeViewModel : ViewModel() {
+class HomeViewModel(
+    private val context: Context
+) : ViewModel() {
     
-    private val getLiveMatchesUseCase = GetLiveMatchesUseCase(MatchRepositoryImpl())
-    private val toggleFavoriteMatchUseCase = ToggleFavoriteMatchUseCase(MatchRepositoryImpl())
+    private val matchRepository = MatchRepositoryImpl(context)
+    private val getLiveMatchesUseCase = GetLiveMatchesUseCase(matchRepository)
+    private val toggleFavoriteMatchUseCase = ToggleFavoriteMatchUseCase(matchRepository)
     
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()

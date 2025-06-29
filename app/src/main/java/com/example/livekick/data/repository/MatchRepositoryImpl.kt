@@ -1,21 +1,25 @@
 package com.example.livekick.data.repository
 
+import android.content.Context
 import android.util.Log
+import com.example.livekick.data.local.AppDatabase
+import com.example.livekick.data.local.repository.LocalMatchRepository
 import com.example.livekick.data.remote.NetworkModule
 import com.example.livekick.data.remote.mapper.ApiFootballMapper
 import com.example.livekick.domain.model.*
 import com.example.livekick.domain.repository.MatchRepository
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.*
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-class MatchRepositoryImpl : MatchRepository {
+class MatchRepositoryImpl(
+    private val context: Context
+) : MatchRepository {
     
-    private val favoriteMatches = mutableSetOf<String>()
     private val apiService = NetworkModule.apiFootballService
+    private val localRepository = LocalMatchRepository(AppDatabase.getDatabase(context))
     
     override fun getLiveMatches(): Flow<List<Match>> = flow {
         while (true) {
@@ -71,17 +75,38 @@ class MatchRepositoryImpl : MatchRepository {
                 
                 Log.d("LiveKick", "После фильтрации: ${filteredMatches.size} матчей")
                 
+                // Сохраняем в локальную базу данных
+                if (filteredMatches.isNotEmpty()) {
+                    localRepository.saveMatches(filteredMatches)
+                    Log.d("LiveKick", "Матчи сохранены в локальную БД")
+                }
+                
                 // Добавляем статус избранного к матчам
                 val matchesWithFavorites = filteredMatches.map { match ->
-                    match.copy(isFavorite = favoriteMatches.contains(match.id))
+                    match.copy(isFavorite = false) // Будет обновлено из локальной БД
                 }
                 
                 Log.d("LiveKick", "Отправляем ${matchesWithFavorites.size} матчей в UI")
                 emit(matchesWithFavorites)
+                
             } catch (e: Exception) {
                 Log.e("LiveKick", "Ошибка API: ${e.message}", e)
-                // В случае ошибки API возвращаем заглушечные данные
-                emit(generateFallbackMatches())
+                
+                // Пытаемся получить данные из локальной БД
+                try {
+                    Log.d("LiveKick", "Пытаемся получить данные из локальной БД")
+                    val localMatches = localRepository.getLiveAndTodayMatches().first()
+                    if (localMatches.isNotEmpty()) {
+                        Log.d("LiveKick", "Получено ${localMatches.size} матчей из локальной БД")
+                        emit(localMatches)
+                    } else {
+                        Log.d("LiveKick", "Локальная БД пуста, используем заглушечные данные")
+                        emit(generateFallbackMatches())
+                    }
+                } catch (localError: Exception) {
+                    Log.e("LiveKick", "Ошибка локальной БД: ${localError.message}")
+                    emit(generateFallbackMatches())
+                }
             }
             
             delay(30000) // Обновляем каждые 30 секунд
@@ -96,7 +121,7 @@ class MatchRepositoryImpl : MatchRepository {
             } ?: emptyList()
             
             val matchesWithFavorites = matches.map { match ->
-                match.copy(isFavorite = favoriteMatches.contains(match.id))
+                match.copy(isFavorite = false)
             }
             
             emit(matchesWithFavorites)
@@ -113,42 +138,38 @@ class MatchRepositoryImpl : MatchRepository {
                 ApiFootballMapper.mapMatchResponseToMatch(matchResponse)
             }
             
-            val matchWithFavorite = match?.copy(isFavorite = favoriteMatches.contains(matchId))
+            val matchWithFavorite = match?.copy(isFavorite = false)
             emit(matchWithFavorite)
         } catch (e: Exception) {
             Log.e("LiveKick", "Ошибка получения матча по ID: ${e.message}", e)
-            emit(null)
+            // Пытаемся получить из локальной БД
+            val localMatch = localRepository.getMatchById(matchId)
+            emit(localMatch)
         }
     }
     
-    override fun getFavoriteMatches(): Flow<List<Match>> = flow {
-        try {
-            val today = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-            val response = apiService.getMatchesByDate(dateFrom = today, dateTo = today)
-            val allMatches = response.matches?.let { matchList ->
-                ApiFootballMapper.mapMatchResponseListToMatches(matchList)
-            } ?: emptyList()
-            
-            val favoriteMatchesList = allMatches.filter { favoriteMatches.contains(it.id) }
-                .map { it.copy(isFavorite = true) }
-            
-            emit(favoriteMatchesList)
-        } catch (e: Exception) {
-            Log.e("LiveKick", "Ошибка получения избранных матчей: ${e.message}", e)
-            emit(emptyList())
-        }
+    override fun getFavoriteMatches(): Flow<List<Match>> {
+        return localRepository.getFavoriteMatches()
     }
     
     override suspend fun toggleFavorite(matchId: String) {
-        if (favoriteMatches.contains(matchId)) {
-            favoriteMatches.remove(matchId)
-        } else {
-            favoriteMatches.add(matchId)
+        try {
+            // Получаем текущий статус из локальной БД
+            val currentMatch = localRepository.getMatchById(matchId)
+            val newFavoriteStatus = !(currentMatch?.isFavorite ?: false)
+            
+            // Обновляем статус в локальной БД
+            localRepository.updateFavoriteStatus(matchId, newFavoriteStatus)
+            
+            Log.d("LiveKick", "Статус избранного для матча $matchId изменен на: $newFavoriteStatus")
+        } catch (e: Exception) {
+            Log.e("LiveKick", "Ошибка изменения статуса избранного: ${e.message}", e)
         }
     }
     
     override suspend fun refreshMatches() {
-        // Обновление происходит автоматически в getLiveMatches()
+        // Очищаем старые матчи
+        localRepository.clearOldMatches()
         delay(1000)
     }
     
@@ -190,7 +211,7 @@ class MatchRepositoryImpl : MatchRepository {
                     MatchEvent("3", EventType.GOAL, 58, teams[0], "Винни"),
                     MatchEvent("4", EventType.YELLOW_CARD, 45, teams[1], "Бускетс")
                 ),
-                isFavorite = favoriteMatches.contains("1")
+                isFavorite = false
             ),
             Match(
                 id = "2",
@@ -205,7 +226,7 @@ class MatchRepositoryImpl : MatchRepository {
                 events = listOf(
                     MatchEvent("5", EventType.YELLOW_CARD, 12, teams[2], "Фернандеш")
                 ),
-                isFavorite = favoriteMatches.contains("2")
+                isFavorite = false
             ),
             Match(
                 id = "3",
@@ -224,7 +245,7 @@ class MatchRepositoryImpl : MatchRepository {
                     MatchEvent("9", EventType.GOAL, 67, teams[5], "Неймар"),
                     MatchEvent("10", EventType.GOAL, 78, teams[4], "Кейн")
                 ),
-                isFavorite = favoriteMatches.contains("3")
+                isFavorite = false
             ),
             Match(
                 id = "4",
@@ -240,7 +261,7 @@ class MatchRepositoryImpl : MatchRepository {
                     MatchEvent("11", EventType.GOAL, 18, teams[6], "Влахович"),
                     MatchEvent("12", EventType.GOAL, 29, teams[7], "Леао")
                 ),
-                isFavorite = favoriteMatches.contains("4")
+                isFavorite = false
             )
         )
     }
