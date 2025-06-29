@@ -1,31 +1,36 @@
 package com.example.livekick.presentation
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.livekick.presentation.navigation.NavGraph
 import com.example.livekick.ui.theme.LiveKickTheme
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.runtime.remember
+import com.example.livekick.ui.theme.LocalThemeManager
+import com.example.livekick.ui.theme.ThemeManager
 
 @Composable
 fun LiveKickApp() {
-    val context = LocalContext.current
+    val themeManager = remember { ThemeManager() }
     val navController = rememberNavController()
     
-    LiveKickTheme {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
-        ) {
-            NavGraph(
-                navController = navController,
-                startDestination = "home"
-            )
+    CompositionLocalProvider(LocalThemeManager provides themeManager) {
+        val isDarkTheme = themeManager.isDarkTheme(isSystemInDarkTheme())
+        
+        LiveKickTheme(darkTheme = isDarkTheme) {
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = MaterialTheme.colorScheme.background
+            ) {
+                NavGraph(
+                    navController = navController,
+                    startDestination = "home"
+                )
+            }
         }
     }
 } 

@@ -33,6 +33,7 @@ import com.example.livekick.presentation.component.MatchCard
 import com.example.livekick.presentation.component.SearchAndFilterBar
 import com.example.livekick.presentation.viewmodel.HomeViewModel
 import com.example.livekick.presentation.viewmodel.HomeViewModelFactory
+import com.example.livekick.ui.theme.LocalThemeManager
 import androidx.compose.foundation.ExperimentalFoundationApi
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -51,6 +52,8 @@ fun HomeScreen(
     val selectedLeague by viewModel.selectedLeague.collectAsState()
     val selectedDate by viewModel.selectedDate.collectAsState()
     val availableLeagues by viewModel.availableLeagues.collectAsState()
+    
+    val themeManager = LocalThemeManager.current
 
     Column(
         modifier = Modifier
@@ -74,6 +77,20 @@ fun HomeScreen(
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+                IconButton(
+                    onClick = { themeManager.toggleTheme() }
+                ) {
+                    Icon(
+                        imageVector = if (themeManager.themeMode == com.example.livekick.ui.theme.ThemeMode.DARK) {
+                            Icons.Default.LightMode
+                        } else {
+                            Icons.Default.DarkMode
+                        },
+                        contentDescription = "Переключить тему",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+                
                 IconButton(
                     onClick = { viewModel.onRefresh() }
                 ) {
