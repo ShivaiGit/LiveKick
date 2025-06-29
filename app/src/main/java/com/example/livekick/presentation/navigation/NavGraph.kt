@@ -14,6 +14,7 @@ import com.example.livekick.presentation.screen.favorites.FavoritesScreen
 import com.example.livekick.presentation.screen.home.HomeScreen
 import com.example.livekick.presentation.screen.match.MatchDetailScreen
 import com.example.livekick.presentation.screen.settings.NotificationSettingsScreen
+import com.example.livekick.presentation.screen.statistics.TeamStatisticsScreen
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -50,6 +51,9 @@ fun NavGraph(
                 },
                 onNavigateToSettings = {
                     navController.navigate("settings")
+                },
+                onNavigateToStatistics = {
+                    navController.navigate("statistics")
                 }
             )
         }
@@ -122,6 +126,28 @@ fun NavGraph(
             }
         ) {
             NotificationSettingsScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+        
+        composable(
+            route = "statistics",
+            enterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { it },
+                    animationSpec = tween(300, easing = EaseOutCubic)
+                ) + fadeIn(animationSpec = tween(300))
+            },
+            exitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { -it },
+                    animationSpec = tween(300, easing = EaseInCubic)
+                ) + fadeOut(animationSpec = tween(300))
+            }
+        ) {
+            TeamStatisticsScreen(
                 onNavigateBack = {
                     navController.popBackStack()
                 }

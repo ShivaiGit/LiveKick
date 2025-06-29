@@ -46,7 +46,8 @@ fun HomeScreen(
     ),
     onNavigateToMatch: (String) -> Unit,
     onNavigateToFavorites: () -> Unit,
-    onNavigateToSettings: () -> Unit
+    onNavigateToSettings: () -> Unit,
+    onNavigateToStatistics: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
@@ -119,6 +120,16 @@ fun HomeScreen(
                     Icon(
                         imageVector = Icons.Default.Settings,
                         contentDescription = "Настройки",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+                
+                IconButton(
+                    onClick = onNavigateToStatistics
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Analytics,
+                        contentDescription = "Статистика",
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }

@@ -21,6 +21,7 @@ import com.example.livekick.domain.model.*
 import com.example.livekick.presentation.component.MatchCard
 import com.example.livekick.presentation.component.LiveMatchStats
 import com.example.livekick.presentation.component.MatchProgressBar
+import com.example.livekick.presentation.component.AdvancedMatchStats
 import com.example.livekick.presentation.viewmodel.MatchDetailViewModel
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -142,6 +143,14 @@ fun MatchDetailScreen(
                     item {
                         // Статистика матча
                         MatchStatisticsCard(match = uiState.match!!)
+                    }
+                    
+                    item {
+                        // Расширенная статистика
+                        AdvancedMatchStats(
+                            match = uiState.match!!,
+                            statistics = null // Пока используем null, позже добавим реальные данные
+                        )
                     }
                     
                     item {
