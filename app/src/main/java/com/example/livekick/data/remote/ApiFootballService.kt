@@ -3,54 +3,47 @@ package com.example.livekick.data.remote
 import com.example.livekick.data.remote.dto.ApiFootballResponse
 import retrofit2.http.GET
 import retrofit2.http.Headers
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface ApiFootballService {
     
     @Headers(
-        "X-RapidAPI-Key: 0fa283c7950ab094c03f7cc0e5e28cf5",
-        "X-RapidAPI-Host: api-football-v1.p.rapidapi.com"
+        "X-Auth-Token: 981f8292b80243acb01c6b7f98bce050"
     )
-    @GET("fixtures")
-    suspend fun getLiveMatches(
-        @Query("live") live: String = "all"
-    ): ApiFootballResponse
+    @GET("matches")
+    suspend fun getLiveMatches(): ApiFootballResponse
     
     @Headers(
-        "X-RapidAPI-Key: 0fa283c7950ab094c03f7cc0e5e28cf5",
-        "X-RapidAPI-Host: api-football-v1.p.rapidapi.com"
+        "X-Auth-Token: 981f8292b80243acb01c6b7f98bce050"
     )
-    @GET("fixtures")
+    @GET("matches")
     suspend fun getMatchesByDate(
-        @Query("date") date: String,
-        @Query("league") leagueId: String? = null
+        @Query("dateFrom") dateFrom: String,
+        @Query("dateTo") dateTo: String,
+        @Query("competitions") competitions: String? = null
     ): ApiFootballResponse
     
     @Headers(
-        "X-RapidAPI-Key: 0fa283c7950ab094c03f7cc0e5e28cf5",
-        "X-RapidAPI-Host: api-football-v1.p.rapidapi.com"
+        "X-Auth-Token: 981f8292b80243acb01c6b7f98bce050"
     )
-    @GET("fixtures")
+    @GET("matches/{id}")
     suspend fun getMatchById(
-        @Query("id") matchId: String
+        @Path("id") matchId: String
     ): ApiFootballResponse
     
     @Headers(
-        "X-RapidAPI-Key: 0fa283c7950ab094c03f7cc0e5e28cf5",
-        "X-RapidAPI-Host: api-football-v1.p.rapidapi.com"
+        "X-Auth-Token: 981f8292b80243acb01c6b7f98bce050"
     )
-    @GET("fixtures")
-    suspend fun getMatchesByLeague(
-        @Query("league") leagueId: String,
+    @GET("competitions/{id}/matches")
+    suspend fun getMatchesByCompetition(
+        @Path("id") competitionId: String,
         @Query("season") season: Int = 2024
     ): ApiFootballResponse
     
     @Headers(
-        "X-RapidAPI-Key: 0fa283c7950ab094c03f7cc0e5e28cf5",
-        "X-RapidAPI-Host: api-football-v1.p.rapidapi.com"
+        "X-Auth-Token: 981f8292b80243acb01c6b7f98bce050"
     )
-    @GET("leagues")
-    suspend fun getLeagues(
-        @Query("country") country: String? = null
-    ): ApiFootballResponse
+    @GET("competitions")
+    suspend fun getCompetitions(): ApiFootballResponse
 } 

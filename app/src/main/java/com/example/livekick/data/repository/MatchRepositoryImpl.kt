@@ -8,6 +8,7 @@ import com.example.livekick.domain.repository.MatchRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -19,17 +20,59 @@ class MatchRepositoryImpl : MatchRepository {
     override fun getLiveMatches(): Flow<List<Match>> = flow {
         while (true) {
             try {
-                Log.d("LiveKick", "Запрашиваем живые матчи...")
-                val response = apiService.getLiveMatches()
-                Log.d("LiveKick", "Получен ответ: ${response.results} матчей")
+                Log.d("LiveKick", "Запрашиваем матчи из нескольких лиг")
                 
-                val matches = response.response?.let { fixtures ->
-                    Log.d("LiveKick", "Обрабатываем ${fixtures.size} матчей")
-                    ApiFootballMapper.mapFixtureResponseListToMatches(fixtures)
-                } ?: emptyList()
+                // Получаем матчи из нескольких популярных лиг
+                val allMatches = mutableListOf<Match>()
+                
+                // Premier League (2021)
+                try {
+                    val premierResponse = apiService.getMatchesByCompetition(competitionId = "2021")
+                    premierResponse.matches?.let { matchList ->
+                        val matches = ApiFootballMapper.mapMatchResponseListToMatches(matchList)
+                        allMatches.addAll(matches)
+                        Log.d("LiveKick", "Premier League: ${matches.size} матчей")
+                    }
+                } catch (e: Exception) {
+                    Log.e("LiveKick", "Ошибка Premier League: ${e.message}")
+                }
+                
+                // La Liga (2014)
+                try {
+                    val laligaResponse = apiService.getMatchesByCompetition(competitionId = "2014")
+                    laligaResponse.matches?.let { matchList ->
+                        val matches = ApiFootballMapper.mapMatchResponseListToMatches(matchList)
+                        allMatches.addAll(matches)
+                        Log.d("LiveKick", "La Liga: ${matches.size} матчей")
+                    }
+                } catch (e: Exception) {
+                    Log.e("LiveKick", "Ошибка La Liga: ${e.message}")
+                }
+                
+                // Bundesliga (2002)
+                try {
+                    val bundesligaResponse = apiService.getMatchesByCompetition(competitionId = "2002")
+                    bundesligaResponse.matches?.let { matchList ->
+                        val matches = ApiFootballMapper.mapMatchResponseListToMatches(matchList)
+                        allMatches.addAll(matches)
+                        Log.d("LiveKick", "Bundesliga: ${matches.size} матчей")
+                    }
+                } catch (e: Exception) {
+                    Log.e("LiveKick", "Ошибка Bundesliga: ${e.message}")
+                }
+                
+                Log.d("LiveKick", "Всего получено: ${allMatches.size} матчей")
+                
+                // Фильтруем только live и ближайшие матчи (сегодняшние)
+                val filteredMatches = allMatches.filter { match ->
+                    match.status == MatchStatus.LIVE ||
+                    (match.dateTime.toLocalDate() == LocalDate.now() && match.status == MatchStatus.SCHEDULED)
+                }.take(10) // Ограничиваем до 10 матчей
+                
+                Log.d("LiveKick", "После фильтрации: ${filteredMatches.size} матчей")
                 
                 // Добавляем статус избранного к матчам
-                val matchesWithFavorites = matches.map { match ->
+                val matchesWithFavorites = filteredMatches.map { match ->
                     match.copy(isFavorite = favoriteMatches.contains(match.id))
                 }
                 
@@ -47,9 +90,9 @@ class MatchRepositoryImpl : MatchRepository {
     
     override fun getMatchesByLeague(leagueId: String): Flow<List<Match>> = flow {
         try {
-            val response = apiService.getMatchesByLeague(leagueId = leagueId)
-            val matches = response.response?.let { fixtures ->
-                ApiFootballMapper.mapFixtureResponseListToMatches(fixtures)
+            val response = apiService.getMatchesByCompetition(competitionId = leagueId)
+            val matches = response.matches?.let { matchList ->
+                ApiFootballMapper.mapMatchResponseListToMatches(matchList)
             } ?: emptyList()
             
             val matchesWithFavorites = matches.map { match ->
@@ -66,8 +109,8 @@ class MatchRepositoryImpl : MatchRepository {
     override fun getMatchById(matchId: String): Flow<Match?> = flow {
         try {
             val response = apiService.getMatchById(matchId)
-            val match = response.response?.firstOrNull()?.let { fixture ->
-                ApiFootballMapper.mapFixtureResponseToMatch(fixture)
+            val match = response.matches?.firstOrNull()?.let { matchResponse ->
+                ApiFootballMapper.mapMatchResponseToMatch(matchResponse)
             }
             
             val matchWithFavorite = match?.copy(isFavorite = favoriteMatches.contains(matchId))
@@ -80,9 +123,10 @@ class MatchRepositoryImpl : MatchRepository {
     
     override fun getFavoriteMatches(): Flow<List<Match>> = flow {
         try {
-            val response = apiService.getLiveMatches()
-            val allMatches = response.response?.let { fixtures ->
-                ApiFootballMapper.mapFixtureResponseListToMatches(fixtures)
+            val today = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+            val response = apiService.getMatchesByDate(dateFrom = today, dateTo = today)
+            val allMatches = response.matches?.let { matchList ->
+                ApiFootballMapper.mapMatchResponseListToMatches(matchList)
             } ?: emptyList()
             
             val favoriteMatchesList = allMatches.filter { favoriteMatches.contains(it.id) }

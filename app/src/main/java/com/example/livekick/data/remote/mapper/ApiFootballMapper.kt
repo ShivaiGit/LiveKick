@@ -3,22 +3,22 @@ package com.example.livekick.data.remote.mapper
 import com.example.livekick.data.remote.dto.*
 import com.example.livekick.domain.model.*
 import java.time.LocalDateTime
-import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 
 object ApiFootballMapper {
     
-    fun mapFixtureResponseToMatch(fixtureResponse: FixtureResponse): Match {
+    fun mapMatchResponseToMatch(matchResponse: MatchResponse): Match {
         return Match(
-            id = fixtureResponse.fixture.id.toString(),
-            homeTeam = mapTeamDtoToTeam(fixtureResponse.teams.home),
-            awayTeam = mapTeamDtoToTeam(fixtureResponse.teams.away),
-            homeScore = fixtureResponse.goals.home ?: 0,
-            awayScore = fixtureResponse.goals.away ?: 0,
-            status = mapStatusToMatchStatus(fixtureResponse.fixture.status),
-            minute = fixtureResponse.fixture.status.elapsed,
-            league = mapLeagueDtoToLeague(fixtureResponse.league),
-            dateTime = LocalDateTime.ofEpochSecond(fixtureResponse.fixture.timestamp, 0, ZoneOffset.UTC),
-            events = fixtureResponse.events?.map { mapEventDtoToEvent(it) } ?: emptyList(),
+            id = matchResponse.id.toString(),
+            homeTeam = mapTeamDtoToTeam(matchResponse.homeTeam),
+            awayTeam = mapTeamDtoToTeam(matchResponse.awayTeam),
+            homeScore = matchResponse.score.fullTime.home ?: 0,
+            awayScore = matchResponse.score.fullTime.away ?: 0,
+            status = mapStatusToMatchStatus(matchResponse.status),
+            minute = null, // API не предоставляет минуту матча
+            league = mapCompetitionDtoToLeague(matchResponse.competition),
+            dateTime = parseDateTime(matchResponse.utcDate),
+            events = emptyList(), // API не предоставляет события матча в бесплатной версии
             isFavorite = false // Будет управляться локально
         )
     }
@@ -27,53 +27,36 @@ object ApiFootballMapper {
         return Team(
             id = teamDto.id.toString(),
             name = teamDto.name,
-            shortName = teamDto.name.split(" ").take(2).joinToString(" "),
-            logoUrl = teamDto.logo
+            shortName = teamDto.shortName,
+            logoUrl = teamDto.crest
         )
     }
     
-    private fun mapLeagueDtoToLeague(leagueDto: LeagueDto): League {
+    private fun mapCompetitionDtoToLeague(competitionDto: CompetitionDto): League {
         return League(
-            id = leagueDto.id.toString(),
-            name = leagueDto.name,
-            country = leagueDto.country,
-            logoUrl = leagueDto.logo
+            id = competitionDto.id.toString(),
+            name = competitionDto.name,
+            country = "", // API не предоставляет страну в этом эндпоинте
+            logoUrl = competitionDto.emblem
         )
     }
     
-    private fun mapStatusToMatchStatus(statusDto: StatusDto): MatchStatus {
-        return when (statusDto.short.lowercase()) {
-            "1h", "2h", "ht", "et", "p", "bt" -> MatchStatus.LIVE
-            "ft", "aet", "pen", "pft" -> MatchStatus.FINISHED
-            "ns", "tbd" -> MatchStatus.SCHEDULED
-            "canc", "abnd", "susp", "int", "pst" -> MatchStatus.CANCELLED
+    private fun mapStatusToMatchStatus(status: String): MatchStatus {
+        return when (status.lowercase()) {
+            "live", "in_play" -> MatchStatus.LIVE
+            "finished", "postponed", "suspended" -> MatchStatus.FINISHED
+            "scheduled", "timed" -> MatchStatus.SCHEDULED
+            "cancelled" -> MatchStatus.CANCELLED
             else -> MatchStatus.SCHEDULED
         }
     }
     
-    private fun mapEventDtoToEvent(eventDto: EventDto): MatchEvent {
-        return MatchEvent(
-            id = "${eventDto.time.elapsed}_${eventDto.player.id}",
-            type = mapEventType(eventDto.type, eventDto.detail),
-            minute = eventDto.time.elapsed ?: 0,
-            team = mapTeamDtoToTeam(eventDto.team),
-            player = eventDto.player.name,
-            description = eventDto.detail
-        )
+    private fun parseDateTime(dateTimeString: String): LocalDateTime {
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
+        return LocalDateTime.parse(dateTimeString, formatter)
     }
     
-    private fun mapEventType(type: String, detail: String): EventType {
-        return when {
-            type.lowercase() == "goal" -> EventType.GOAL
-            detail.lowercase().contains("yellow") -> EventType.YELLOW_CARD
-            detail.lowercase().contains("red") -> EventType.RED_CARD
-            detail.lowercase().contains("substitution") -> EventType.SUBSTITUTION
-            detail.lowercase().contains("corner") -> EventType.CORNER
-            else -> EventType.FOUL
-        }
-    }
-    
-    fun mapFixtureResponseListToMatches(fixtures: List<FixtureResponse>): List<Match> {
-        return fixtures.map { mapFixtureResponseToMatch(it) }
+    fun mapMatchResponseListToMatches(matches: List<MatchResponse>): List<Match> {
+        return matches.map { mapMatchResponseToMatch(it) }
     }
 } 

@@ -3,75 +3,62 @@ package com.example.livekick.data.remote.dto
 import com.google.gson.annotations.SerializedName
 
 data class ApiFootballResponse(
-    val get: String,
-    val parameters: Map<String, Any>?,
-    val errors: List<String>?,
-    val results: Int,
-    val paging: Paging?,
-    val response: List<FixtureResponse>?
+    val count: Int,
+    val filters: Filters?,
+    val matches: List<MatchResponse>?,
+    val competitions: List<CompetitionResponse>?,
+    val errorCode: Int? = null,
+    val message: String? = null
 )
 
-data class Paging(
-    val current: Int,
-    val total: Int
+data class Filters(
+    val dateFrom: String?,
+    val dateTo: String?,
+    val permission: String?
 )
 
-data class FixtureResponse(
-    val fixture: FixtureDto,
-    val league: LeagueDto,
-    val teams: TeamsDto,
-    val goals: GoalsDto,
+data class MatchResponse(
+    val id: Int,
+    val competition: CompetitionDto,
+    val season: SeasonDto,
+    val utcDate: String,
+    val status: String,
+    val matchday: Int,
+    val stage: String,
+    val group: String?,
+    val lastUpdated: String,
+    val odds: OddsDto?,
     val score: ScoreDto,
-    val events: List<EventDto>? = null
+    val homeTeam: TeamDto,
+    val awayTeam: TeamDto,
+    val referees: List<RefereeDto>?
 )
 
-data class FixtureDto(
-    val id: Int,
-    val referee: String?,
-    val timezone: String,
-    val date: String,
-    val timestamp: Long,
-    val periods: PeriodsDto,
-    val venue: VenueDto?,
-    val status: StatusDto
-)
-
-data class PeriodsDto(
-    val first: Long?,
-    val second: Long?
-)
-
-data class VenueDto(
-    val id: Int?,
-    val name: String?,
-    val city: String?
-)
-
-data class StatusDto(
-    val long: String,
-    val short: String,
-    val elapsed: Int?
-)
-
-data class LeagueDto(
+data class CompetitionDto(
     val id: Int,
     val name: String,
-    val country: String,
-    val logo: String,
-    val flag: String?,
-    val season: Int,
-    val round: String
+    val code: String,
+    val type: String,
+    val emblem: String
 )
 
-data class TeamsDto(
-    val home: TeamDto,
-    val away: TeamDto
-)
-
-data class TeamDto(
+data class SeasonDto(
     val id: Int,
-    val name: String,
-    val logo: String
+    val startDate: String,
+    val endDate: String,
+    val currentMatchday: Int,
+    val winner: String?
+)
+
+data class OddsDto(
+    val msg: String
+)
+
+data class ScoreDto(
+    val winner: String?,
+    val duration: String,
+    val fullTime: GoalsDto,
+    val halfTime: GoalsDto
 )
 
 data class GoalsDto(
@@ -79,29 +66,29 @@ data class GoalsDto(
     val away: Int?
 )
 
-data class ScoreDto(
-    val halftime: GoalsDto,
-    val fulltime: GoalsDto,
-    val extratime: GoalsDto?,
-    val penalty: GoalsDto?
+data class TeamDto(
+    val id: Int,
+    val name: String,
+    val shortName: String,
+    val tla: String,
+    val crest: String
 )
 
-data class EventDto(
-    val time: TimeDto,
-    val team: TeamDto,
-    val player: PlayerDto,
-    val assist: PlayerDto?,
+data class RefereeDto(
+    val id: Int,
+    val name: String,
     val type: String,
-    val detail: String,
-    val comments: String?
+    val nationality: String?
 )
 
-data class TimeDto(
-    val elapsed: Int?,
-    val extra: Int?
-)
-
-data class PlayerDto(
-    val id: Int?,
-    val name: String
+data class CompetitionResponse(
+    val id: Int,
+    val name: String,
+    val code: String,
+    val type: String,
+    val emblem: String,
+    val plan: String,
+    val currentSeason: SeasonDto,
+    val numberOfAvailableSeasons: Int,
+    val lastUpdated: String
 ) 
