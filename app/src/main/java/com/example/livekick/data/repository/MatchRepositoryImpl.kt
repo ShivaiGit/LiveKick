@@ -21,95 +21,48 @@ class MatchRepositoryImpl(
     private val apiService = NetworkModule.apiFootballService
     private val localRepository = LocalMatchRepository(AppDatabase.getDatabase(context))
     
+    // Функция для тестирования API подключения
+    suspend fun testApiConnection() {
+        try {
+            Log.d("LiveKick", "=== ТЕСТИРОВАНИЕ API ПОДКЛЮЧЕНИЯ ===")
+            val response = apiService.testApi()
+            Log.d("LiveKick", "API тест успешен: ${response}")
+        } catch (e: Exception) {
+            Log.e("LiveKick", "API тест провален: ${e.message}", e)
+        }
+    }
+    
     override fun getLiveMatches(): Flow<List<Match>> = flow {
         while (true) {
             try {
                 Log.d("LiveKick", "=== НАЧАЛО ЗАПРОСА LIVE МАТЧЕЙ ===")
-                Log.d("LiveKick", "Запрашиваем матчи из нескольких лиг")
                 
-                // Получаем матчи из нескольких популярных лиг
-                val allMatches = mutableListOf<Match>()
+                // Сначала пробуем получить live матчи
+                val liveMatches = mutableListOf<Match>()
                 
-                // Premier League (2021) - только один запрос для экономии лимитов
                 try {
-                    Log.d("LiveKick", "Запрашиваем Premier League...")
-                    val premierResponse = apiService.getMatchesByLeague(leagueId = "2021")
-                    premierResponse.matches?.let { matchList ->
+                    Log.d("LiveKick", "Запрашиваем live матчи...")
+                    val liveResponse = apiService.getLiveMatches()
+                    liveResponse.matches?.let { matchList ->
                         val matches = ApiFootballMapper.mapMatchResponseListToMatches(matchList)
-                        allMatches.addAll(matches)
-                        Log.d("LiveKick", "Premier League: ${matches.size} матчей")
+                        liveMatches.addAll(matches)
+                        Log.d("LiveKick", "Live матчи: ${matches.size}")
                     }
-                    
-                    // Ждем 2 секунды перед следующим запросом
-                    delay(2000)
-                    
                 } catch (e: Exception) {
-                    Log.e("LiveKick", "Ошибка Premier League: ${e.message}")
+                    Log.e("LiveKick", "Ошибка получения live матчей: ${e.message}")
                 }
                 
-                // Если Premier League не дал результатов, пробуем La Liga
-                if (allMatches.isEmpty()) {
+                // Если нет live матчей, получаем сегодняшние матчи
+                if (liveMatches.isEmpty()) {
                     try {
-                        Log.d("LiveKick", "Запрашиваем La Liga...")
-                        val laligaResponse = apiService.getMatchesByLeague(leagueId = "2014")
-                        laligaResponse.matches?.let { matchList ->
-                            val matches = ApiFootballMapper.mapMatchResponseListToMatches(matchList)
-                            allMatches.addAll(matches)
-                            Log.d("LiveKick", "La Liga: ${matches.size} матчей")
-                        }
-                        
-                        delay(2000)
-                        
-                    } catch (e: Exception) {
-                        Log.e("LiveKick", "Ошибка La Liga: ${e.message}")
-                    }
-                }
-                
-                // Если все еще нет матчей, пробуем Bundesliga
-                if (allMatches.isEmpty()) {
-                    try {
-                        Log.d("LiveKick", "Запрашиваем Bundesliga...")
-                        val bundesligaResponse = apiService.getMatchesByLeague(leagueId = "2002")
-                        bundesligaResponse.matches?.let { matchList ->
-                            val matches = ApiFootballMapper.mapMatchResponseListToMatches(matchList)
-                            allMatches.addAll(matches)
-                            Log.d("LiveKick", "Bundesliga: ${matches.size} матчей")
-                        }
-                        
-                        delay(2000)
-                        
-                    } catch (e: Exception) {
-                        Log.e("LiveKick", "Ошибка Bundesliga: ${e.message}")
-                    }
-                }
-                
-                Log.d("LiveKick", "Всего получено: ${allMatches.size} матчей")
-                
-                // Фильтруем live, сегодняшние и завтрашние матчи
-                val today = LocalDate.now()
-                val tomorrow = today.plusDays(1)
-                
-                val filteredMatches = allMatches.filter { match ->
-                    match.status == MatchStatus.LIVE ||
-                    (match.dateTime.toLocalDate() == today && match.status == MatchStatus.SCHEDULED) ||
-                    (match.dateTime.toLocalDate() == tomorrow && match.status == MatchStatus.SCHEDULED)
-                }.sortedBy { it.dateTime }.take(15).toMutableList()
-                
-                Log.d("LiveKick", "После фильтрации: ${filteredMatches.size} матчей")
-                
-                // Если нет матчей из лиг, пробуем получить матчи по датам (только один запрос)
-                if (filteredMatches.isEmpty()) {
-                    Log.d("LiveKick", "Нет матчей из лиг, пробуем получить матчи по датам")
-                    
-                    // Сегодняшние матчи
-                    try {
+                        Log.d("LiveKick", "Запрашиваем сегодняшние матчи...")
+                        val today = LocalDate.now()
                         val todayResponse = apiService.getMatchesByDate(
-                            dateFrom = today.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-                            dateTo = today.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                            date = today.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
                         )
                         todayResponse.matches?.let { matchList ->
                             val matches = ApiFootballMapper.mapMatchResponseListToMatches(matchList)
-                            filteredMatches.addAll(matches)
+                            liveMatches.addAll(matches)
                             Log.d("LiveKick", "Сегодняшние матчи: ${matches.size}")
                         }
                     } catch (e: Exception) {
@@ -117,15 +70,40 @@ class MatchRepositoryImpl(
                     }
                 }
                 
-                val finalMatches = filteredMatches.sortedBy { it.dateTime }.take(15)
-                Log.d("LiveKick", "Финальный список: ${finalMatches.size} матчей")
+                // Если все еще нет матчей, получаем завтрашние
+                if (liveMatches.isEmpty()) {
+                    try {
+                        Log.d("LiveKick", "Запрашиваем завтрашние матчи...")
+                        val tomorrow = LocalDate.now().plusDays(1)
+                        val tomorrowResponse = apiService.getMatchesByDate(
+                            date = tomorrow.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                        )
+                        tomorrowResponse.matches?.let { matchList ->
+                            val matches = ApiFootballMapper.mapMatchResponseListToMatches(matchList)
+                            liveMatches.addAll(matches)
+                            Log.d("LiveKick", "Завтрашние матчи: ${matches.size}")
+                        }
+                    } catch (e: Exception) {
+                        Log.e("LiveKick", "Ошибка получения завтрашних матчей: ${e.message}")
+                    }
+                }
+                
+                Log.d("LiveKick", "Всего получено: ${liveMatches.size} матчей")
+                
+                // Фильтруем и сортируем матчи
+                val filteredMatches = liveMatches
+                    .sortedBy { it.dateTime }
+                    .take(15)
+                    .toMutableList()
+                
+                Log.d("LiveKick", "После фильтрации: ${filteredMatches.size} матчей")
                 
                 // Если нет реальных матчей, показываем заглушечные данные
-                val matchesToShow = if (finalMatches.isEmpty()) {
+                val matchesToShow = if (filteredMatches.isEmpty()) {
                     Log.d("LiveKick", "Нет реальных матчей, показываем заглушечные данные")
                     generateFallbackMatches()
                 } else {
-                    finalMatches
+                    filteredMatches
                 }
                 
                 // Сохраняем в локальную базу данных
@@ -168,7 +146,7 @@ class MatchRepositoryImpl(
                 }
             }
             
-            delay(60000) // Обновляем каждые 60 секунд (вместо 30)
+            delay(60000) // Обновляем каждые 60 секунд
         }
     }
     

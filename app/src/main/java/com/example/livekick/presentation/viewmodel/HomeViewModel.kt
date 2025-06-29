@@ -20,7 +20,8 @@ import java.time.LocalDate
 
 class HomeViewModel(
     private val getLiveMatchesUseCase: GetLiveMatchesUseCase,
-    private val toggleFavoriteMatchUseCase: ToggleFavoriteMatchUseCase
+    private val toggleFavoriteMatchUseCase: ToggleFavoriteMatchUseCase,
+    private val matchRepository: MatchRepositoryImpl
 ) : ViewModel() {
     
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -45,7 +46,14 @@ class HomeViewModel(
     private var allMatches = listOf<Match>()
     
     init {
+        testApiConnection()
         loadMatches()
+    }
+    
+    private fun testApiConnection() {
+        viewModelScope.launch {
+            matchRepository.testApiConnection()
+        }
     }
     
     private fun loadMatches() {
@@ -186,7 +194,7 @@ class HomeViewModelFactory(
             val toggleFavoriteMatchUseCase = ToggleFavoriteMatchUseCase(matchRepository)
             
             @Suppress("UNCHECKED_CAST")
-            return HomeViewModel(getLiveMatchesUseCase, toggleFavoriteMatchUseCase) as T
+            return HomeViewModel(getLiveMatchesUseCase, toggleFavoriteMatchUseCase, matchRepository) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
