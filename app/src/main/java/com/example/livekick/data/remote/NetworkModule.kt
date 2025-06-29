@@ -8,7 +8,11 @@ import java.util.concurrent.TimeUnit
 
 object NetworkModule {
     
-    private const val BASE_URL = "https://api.sstats.net/v1/"
+    // Основной API - football-data.org
+    private const val BASE_URL = "https://api.football-data.org/v4/"
+    
+    // Альтернативный API - api-football.com (если основной не работает)
+    private const val ALTERNATIVE_BASE_URL = "https://v3.football.api-sports.io/"
     
     private val okHttpClient = OkHttpClient.Builder()
         .addInterceptor(HttpLoggingInterceptor().apply {

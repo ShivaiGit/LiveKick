@@ -26,7 +26,6 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val navController = rememberNavController()
                     LiveKickApp(
-                        context = this,
                         navController = navController
                     )
                 }

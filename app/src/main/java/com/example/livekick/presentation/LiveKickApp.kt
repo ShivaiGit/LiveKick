@@ -1,6 +1,5 @@
 package com.example.livekick.presentation
 
-import android.content.Context
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -12,7 +11,6 @@ import com.example.livekick.ui.theme.LiveKickTheme
 
 @Composable
 fun LiveKickApp(
-    context: Context,
     navController: NavHostController
 ) {
     LiveKickTheme {
@@ -21,8 +19,7 @@ fun LiveKickApp(
             color = MaterialTheme.colorScheme.background
         ) {
             NavGraph(
-                navController = navController,
-                context = context
+                navController = navController
             )
         }
     }

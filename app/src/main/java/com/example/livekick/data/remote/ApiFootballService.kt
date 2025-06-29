@@ -9,21 +9,22 @@ import retrofit2.http.Query
 interface ApiFootballService {
     
     @Headers(
-        "X-API-Key: 5z5lfbzk0zkeh88r"
+        "X-Auth-Token: 981f8292b80243acb01c6b7f98bce050"
     )
-    @GET("matches/live")
+    @GET("matches")
     suspend fun getLiveMatches(): ApiFootballResponse
     
     @Headers(
-        "X-API-Key: 5z5lfbzk0zkeh88r"
+        "X-Auth-Token: 981f8292b80243acb01c6b7f98bce050"
     )
     @GET("matches")
     suspend fun getMatchesByDate(
-        @Query("date") date: String
+        @Query("dateFrom") dateFrom: String,
+        @Query("dateTo") dateTo: String
     ): ApiFootballResponse
     
     @Headers(
-        "X-API-Key: 5z5lfbzk0zkeh88r"
+        "X-Auth-Token: 981f8292b80243acb01c6b7f98bce050"
     )
     @GET("matches/{id}")
     suspend fun getMatchById(
@@ -31,16 +32,38 @@ interface ApiFootballService {
     ): ApiFootballResponse
     
     @Headers(
-        "X-API-Key: 5z5lfbzk0zkeh88r"
+        "X-Auth-Token: 981f8292b80243acb01c6b7f98bce050"
     )
-    @GET("leagues/{id}/matches")
+    @GET("competitions/{id}/matches")
     suspend fun getMatchesByLeague(
         @Path("id") leagueId: String
     ): ApiFootballResponse
     
     @Headers(
+        "X-Auth-Token: 981f8292b80243acb01c6b7f98bce050"
+    )
+    @GET("competitions")
+    suspend fun getLeagues(): ApiFootballResponse
+    
+    // Альтернативные эндпоинты для тестирования
+    @Headers(
         "X-API-Key: 5z5lfbzk0zkeh88r"
     )
-    @GET("leagues")
-    suspend fun getLeagues(): ApiFootballResponse
+    @GET("matches/live")
+    suspend fun getLiveMatchesAlt(): ApiFootballResponse
+    
+    @Headers(
+        "X-API-Key: 5z5lfbzk0zkeh88r"
+    )
+    @GET("matches")
+    suspend fun getMatchesByDateAlt(
+        @Query("date") date: String
+    ): ApiFootballResponse
+    
+    // Простой тестовый эндпоинт
+    @Headers(
+        "X-API-Key: 5z5lfbzk0zkeh88r"
+    )
+    @GET("")
+    suspend fun testApi(): ApiFootballResponse
 } 

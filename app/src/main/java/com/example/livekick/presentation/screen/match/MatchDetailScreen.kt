@@ -24,10 +24,9 @@ import com.example.livekick.presentation.viewmodel.MatchDetailViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MatchDetailScreen(
-    navController: NavController,
     matchId: String,
-    context: Context,
-    viewModel: MatchDetailViewModel = viewModel { MatchDetailViewModel(context) }
+    onBackClick: () -> Unit,
+    viewModel: MatchDetailViewModel = viewModel { MatchDetailViewModel() }
 ) {
     val uiState by viewModel.uiState.collectAsState()
     
@@ -47,7 +46,7 @@ fun MatchDetailScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) {
+                    IconButton(onClick = onBackClick) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Назад"

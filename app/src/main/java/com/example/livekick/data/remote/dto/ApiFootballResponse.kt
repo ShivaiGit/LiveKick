@@ -3,45 +3,101 @@ package com.example.livekick.data.remote.dto
 import com.google.gson.annotations.SerializedName
 
 data class ApiFootballResponse(
-    val success: Boolean,
-    val data: List<MatchResponse>?,
-    val message: String? = null,
-    val error: String? = null
+    val count: Int,
+    val filters: Filters?,
+    val matches: List<MatchResponse>?,
+    val competitions: List<CompetitionResponse>?,
+    val errorCode: Int? = null,
+    val message: String? = null
+)
+
+data class Filters(
+    val dateFrom: String?,
+    val dateTo: String?,
+    val permission: String?,
+    val client: String?
 )
 
 data class MatchResponse(
-    val id: String,
-    val league: LeagueDto,
+    val id: Int,
+    val competition: CompetitionDto,
+    val season: SeasonDto,
+    val utcDate: String,
+    val status: String,
+    val matchday: Int,
+    val stage: String,
+    val group: String?,
+    val lastUpdated: String,
+    val odds: OddsDto?,
+    val score: ScoreDto,
     val homeTeam: TeamDto,
     val awayTeam: TeamDto,
-    val homeScore: Int,
-    val awayScore: Int,
-    val status: String,
-    val minute: Int?,
-    val date: String,
-    val time: String,
-    val events: List<EventDto>? = emptyList()
+    val referees: List<RefereeDto>?
 )
 
-data class LeagueDto(
-    val id: String,
+data class CompetitionDto(
+    val id: Int,
     val name: String,
-    val country: String,
-    val logo: String?
+    val code: String,
+    val type: String,
+    val emblem: String
+)
+
+data class SeasonDto(
+    val id: Int,
+    val startDate: String,
+    val endDate: String,
+    val currentMatchday: Int,
+    val winner: Any? // Может быть String или Object
+)
+
+data class OddsDto(
+    val msg: String
+)
+
+data class ScoreDto(
+    val winner: String?,
+    val duration: String,
+    val fullTime: GoalsDto,
+    val halfTime: GoalsDto
+)
+
+data class GoalsDto(
+    val home: Int?,
+    val away: Int?
 )
 
 data class TeamDto(
-    val id: String,
+    val id: Int,
     val name: String,
     val shortName: String,
-    val logo: String?
+    val tla: String,
+    val crest: String
 )
 
-data class EventDto(
-    val id: String,
+data class RefereeDto(
+    val id: Int,
+    val name: String,
     val type: String,
-    val minute: Int,
-    val team: TeamDto,
-    val player: String?,
-    val description: String?
+    val nationality: String?
+)
+
+data class CompetitionResponse(
+    val id: Int,
+    val area: AreaDto,
+    val name: String,
+    val code: String,
+    val type: String,
+    val emblem: String,
+    val plan: String,
+    val currentSeason: SeasonDto,
+    val numberOfAvailableSeasons: Int,
+    val lastUpdated: String
+)
+
+data class AreaDto(
+    val id: Int,
+    val name: String,
+    val code: String,
+    val flag: String?
 ) 
