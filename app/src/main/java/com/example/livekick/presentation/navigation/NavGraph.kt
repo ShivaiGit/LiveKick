@@ -13,42 +13,44 @@ import com.example.livekick.presentation.screen.match.MatchDetailScreen
 @Composable
 fun NavGraph(
     navController: NavHostController,
-    startDestination: String = Screen.Home.route
+    startDestination: String = "home"
 ) {
     NavHost(
         navController = navController,
         startDestination = startDestination
     ) {
-        composable(Screen.Home.route) {
+        composable("home") {
             HomeScreen(
-                onMatchClick = { matchId ->
-                    navController.navigate(Screen.MatchDetail.createRoute(matchId))
+                onNavigateToMatch = { matchId ->
+                    navController.navigate("match/$matchId")
                 },
-                onFavoritesClick = {
-                    navController.navigate(Screen.Favorites.route)
+                onNavigateToFavorites = {
+                    navController.navigate("favorites")
                 }
             )
         }
         
-        composable(Screen.Favorites.route) {
+        composable("favorites") {
             FavoritesScreen(
-                onMatchClick = { matchId ->
-                    navController.navigate(Screen.MatchDetail.createRoute(matchId))
+                onNavigateToMatch = { matchId ->
+                    navController.navigate("match/$matchId")
                 },
-                onToggleFavorite = { matchId ->
-                    // Обработка избранного будет в ViewModel
+                onNavigateBack = {
+                    navController.popBackStack()
                 }
             )
         }
         
         composable(
-            route = Screen.MatchDetail.route,
-            arguments = Screen.MatchDetail.arguments
+            route = "match/{matchId}",
+            arguments = listOf(
+                navArgument("matchId") { type = NavType.StringType }
+            )
         ) { backStackEntry ->
-            val matchId = backStackEntry.arguments?.getString("matchId") ?: ""
+            val matchId = backStackEntry.arguments?.getString("matchId") ?: return@composable
             MatchDetailScreen(
                 matchId = matchId,
-                onBackClick = {
+                onNavigateBack = {
                     navController.popBackStack()
                 }
             )

@@ -32,6 +32,8 @@ fun SearchAndFilterBar(
     onStatusFilterChange: (MatchStatus?) -> Unit,
     selectedLeague: String?,
     onLeagueFilterChange: (String?) -> Unit,
+    selectedDate: String?,
+    onDateFilterChange: (String?) -> Unit,
     availableLeagues: List<String>,
     modifier: Modifier = Modifier
 ) {
@@ -122,6 +124,19 @@ fun SearchAndFilterBar(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+                // Фильтр по дате
+                FilterSection(
+                    title = "Дата",
+                    selectedValue = selectedDate,
+                    onValueChange = onDateFilterChange,
+                    options = listOf(
+                        "today" to "Сегодня",
+                        "tomorrow" to "Завтра",
+                        "yesterday" to "Вчера",
+                        "this_week" to "На этой неделе"
+                    )
+                )
+                
                 // Фильтр по статусу
                 FilterSection(
                     title = "Статус матча",
@@ -147,12 +162,13 @@ fun SearchAndFilterBar(
                 )
                 
                 // Кнопка сброса фильтров
-                if (selectedStatus != null || selectedLeague != null || searchQuery.isNotEmpty()) {
+                if (selectedStatus != null || selectedLeague != null || selectedDate != null || searchQuery.isNotEmpty()) {
                     Button(
                         onClick = {
                             onSearchQueryChange("")
                             onStatusFilterChange(null)
                             onLeagueFilterChange(null)
+                            onDateFilterChange(null)
                         },
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(

@@ -2,7 +2,10 @@ package com.example.livekick.presentation.viewmodel
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.livekick.data.local.AppDatabase
+import com.example.livekick.data.local.repository.LocalMatchRepository
 import com.example.livekick.data.repository.MatchRepositoryImpl
 import com.example.livekick.domain.model.Match
 import com.example.livekick.domain.model.MatchStatus
@@ -13,113 +16,153 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 class HomeViewModel(
-    private val context: Context
+    private val getLiveMatchesUseCase: GetLiveMatchesUseCase,
+    private val toggleFavoriteMatchUseCase: ToggleFavoriteMatchUseCase
 ) : ViewModel() {
-    
-    private val matchRepository = MatchRepositoryImpl(context)
-    private val getLiveMatchesUseCase = GetLiveMatchesUseCase(matchRepository)
-    private val toggleFavoriteMatchUseCase = ToggleFavoriteMatchUseCase(matchRepository)
     
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
     
     // Фильтры
     private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+    
     private val _selectedStatus = MutableStateFlow<MatchStatus?>(null)
+    val selectedStatus: StateFlow<MatchStatus?> = _selectedStatus.asStateFlow()
+    
     private val _selectedLeague = MutableStateFlow<String?>(null)
+    val selectedLeague: StateFlow<String?> = _selectedLeague.asStateFlow()
+    
+    private val _selectedDate = MutableStateFlow<String?>(null)
+    val selectedDate: StateFlow<String?> = _selectedDate.asStateFlow()
+    
+    private val _availableLeagues = MutableStateFlow<List<String>>(emptyList())
+    val availableLeagues: StateFlow<List<String>> = _availableLeagues.asStateFlow()
+    
+    private var allMatches = listOf<Match>()
     
     init {
-        loadLiveMatches()
-        setupFilteredMatches()
+        loadMatches()
     }
     
-    private fun loadLiveMatches() {
+    private fun loadMatches() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
-            
-            getLiveMatchesUseCase().collect { matches ->
+            try {
+                getLiveMatchesUseCase().collect { matches ->
+                    allMatches = matches
+                    
+                    // Обновляем доступные лиги
+                    val leagues = matches.map { it.league.name }.distinct().sortedBy { it }
+                    _availableLeagues.value = leagues
+                    
+                    filterMatches()
+                }
+            } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
-                    allMatches = matches,
-                    isLoading = false
+                    isLoading = false,
+                    error = e.message ?: "Неизвестная ошибка"
                 )
-                // Применяем фильтры к новым данным
-                applyFilters(matches)
             }
         }
     }
     
-    private fun applyFilters(allMatches: List<Match>) {
-        val filteredMatches = filterMatches(
-            allMatches,
-            _searchQuery.value,
-            _selectedStatus.value,
-            _selectedLeague.value
-        )
-        _uiState.value = _uiState.value.copy(
-            matches = filteredMatches
-        )
-    }
-    
-    private fun setupFilteredMatches() {
-        // Инициализация не нужна, фильтры применяются в loadLiveMatches
-    }
-    
-    private fun filterMatches(
-        matches: List<Match>,
-        query: String,
-        status: MatchStatus?,
-        league: String?
-    ): List<Match> {
-        return matches.filter { match ->
-            // Фильтр по поиску
-            val matchesSearch = query.isEmpty() || 
+    private fun filterMatches() {
+        var filteredMatches = allMatches
+        
+        // Фильтр по поиску
+        val query = _searchQuery.value
+        if (query.isNotEmpty()) {
+            filteredMatches = filteredMatches.filter { match ->
                 match.homeTeam.name.contains(query, ignoreCase = true) ||
-                match.homeTeam.shortName.contains(query, ignoreCase = true) ||
                 match.awayTeam.name.contains(query, ignoreCase = true) ||
-                match.awayTeam.shortName.contains(query, ignoreCase = true)
-            
-            // Фильтр по статусу
-            val matchesStatus = status == null || match.status == status
-            
-            // Фильтр по лиге
-            val matchesLeague = league == null || match.league.name == league
-            
-            matchesSearch && matchesStatus && matchesLeague
+                match.league.name.contains(query, ignoreCase = true)
+            }
         }
+        
+        // Фильтр по статусу
+        val status = _selectedStatus.value
+        if (status != null) {
+            filteredMatches = filteredMatches.filter { it.status == status }
+        }
+        
+        // Фильтр по лиге
+        val league = _selectedLeague.value
+        if (league != null) {
+            filteredMatches = filteredMatches.filter { it.league.name == league }
+        }
+        
+        // Фильтр по дате
+        val date = _selectedDate.value
+        if (date != null) {
+            val today = LocalDate.now()
+            filteredMatches = when (date) {
+                "today" -> filteredMatches.filter { 
+                    val matchDate = it.dateTime.toLocalDate()
+                    matchDate == today
+                }
+                "tomorrow" -> filteredMatches.filter { 
+                    val matchDate = it.dateTime.toLocalDate()
+                    matchDate == today.plusDays(1)
+                }
+                "yesterday" -> filteredMatches.filter { 
+                    val matchDate = it.dateTime.toLocalDate()
+                    matchDate == today.minusDays(1)
+                }
+                "this_week" -> filteredMatches.filter { 
+                    val matchDate = it.dateTime.toLocalDate()
+                    val weekStart = today.minusDays(today.dayOfWeek.value.toLong() - 1)
+                    val weekEnd = weekStart.plusDays(6)
+                    matchDate in weekStart..weekEnd
+                }
+                else -> filteredMatches
+            }
+        }
+        
+        _uiState.value = _uiState.value.copy(
+            matches = filteredMatches,
+            isLoading = false,
+            error = null
+        )
     }
     
-    fun updateSearchQuery(query: String) {
+    fun onSearchQueryChange(query: String) {
         _searchQuery.value = query
-        applyFilters(_uiState.value.allMatches)
+        filterMatches()
     }
     
-    fun updateStatusFilter(status: MatchStatus?) {
+    fun onStatusFilterChange(status: MatchStatus?) {
         _selectedStatus.value = status
-        applyFilters(_uiState.value.allMatches)
+        filterMatches()
     }
     
-    fun updateLeagueFilter(league: String?) {
+    fun onLeagueFilterChange(league: String?) {
         _selectedLeague.value = league
-        applyFilters(_uiState.value.allMatches)
+        filterMatches()
     }
     
-    fun clearFilters() {
-        _searchQuery.value = ""
-        _selectedStatus.value = null
-        _selectedLeague.value = null
-        applyFilters(_uiState.value.allMatches)
+    fun onDateFilterChange(date: String?) {
+        _selectedDate.value = date
+        filterMatches()
     }
     
-    fun toggleFavorite(matchId: String) {
+    fun onRefresh() {
+        loadMatches()
+    }
+    
+    fun onToggleFavorite(match: Match) {
         viewModelScope.launch {
-            toggleFavoriteMatchUseCase(matchId)
+            try {
+                toggleFavoriteMatchUseCase(match.id)
+                // Обновляем список матчей после изменения избранного
+                loadMatches()
+            } catch (e: Exception) {
+                // Обработка ошибки
+            }
         }
-    }
-    
-    fun refreshMatches() {
-        loadLiveMatches()
     }
 }
 
@@ -131,4 +174,22 @@ data class HomeUiState(
 ) {
     val availableLeagues: List<String>
         get() = allMatches.map { it.league.name }.distinct().sorted()
+}
+
+// Фабрика для создания HomeViewModel с контекстом
+class HomeViewModelFactory(
+    private val context: Context
+) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(HomeViewModel::class.java)) {
+            val localRepository = LocalMatchRepository(AppDatabase.getDatabase(context))
+            val remoteRepository = MatchRepositoryImpl(context)
+            val getLiveMatchesUseCase = GetLiveMatchesUseCase(remoteRepository)
+            val toggleFavoriteMatchUseCase = ToggleFavoriteMatchUseCase(remoteRepository)
+            
+            @Suppress("UNCHECKED_CAST")
+            return HomeViewModel(getLiveMatchesUseCase, toggleFavoriteMatchUseCase) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
 } 

@@ -29,8 +29,8 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun FavoritesScreen(
-    onMatchClick: (String) -> Unit,
-    onToggleFavorite: (String) -> Unit,
+    onNavigateToMatch: (String) -> Unit,
+    onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -41,7 +41,7 @@ fun FavoritesScreen(
     Scaffold(
         topBar = {
             FavoritesTopBar(
-                onBackClick = { /* Навигация будет обработана в NavGraph */ },
+                onBackClick = onNavigateBack,
                 onRefreshClick = { viewModel.refreshFavorites() }
             )
         }
@@ -67,7 +67,7 @@ fun FavoritesScreen(
                 else -> {
                     FavoritesList(
                         matches = uiState.matches,
-                        onMatchClick = onMatchClick,
+                        onMatchClick = onNavigateToMatch,
                         onToggleFavorite = { matchId ->
                             viewModel.toggleFavorite(matchId)
                         },
