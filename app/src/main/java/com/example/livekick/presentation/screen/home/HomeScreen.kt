@@ -31,6 +31,8 @@ import com.example.livekick.domain.model.Match
 import com.example.livekick.domain.model.MatchStatus
 import com.example.livekick.presentation.component.MatchCard
 import com.example.livekick.presentation.component.SearchAndFilterBar
+import com.example.livekick.presentation.component.AnimatedMatchCard
+import com.example.livekick.presentation.component.AnimatedLoadingIndicator
 import com.example.livekick.presentation.viewmodel.HomeViewModel
 import com.example.livekick.presentation.viewmodel.HomeViewModelFactory
 import com.example.livekick.ui.theme.LocalThemeManager
@@ -147,9 +149,19 @@ fun HomeScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(
-                        color = MaterialTheme.colorScheme.primary
-                    )
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        AnimatedLoadingIndicator(
+                            modifier = Modifier.size(48.dp)
+                        )
+                        Text(
+                            text = "Загрузка матчей...",
+                            fontSize = 16.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
             
@@ -218,11 +230,15 @@ fun HomeScreen(
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    items(uiState.matches) { match ->
-                        MatchCard(
+                    items(
+                        items = uiState.matches,
+                        key = { it.id }
+                    ) { match ->
+                        AnimatedMatchCard(
                             match = match,
                             onMatchClick = { onNavigateToMatch(match.id) },
-                            onFavoriteClick = { viewModel.onToggleFavorite(match) }
+                            onFavoriteClick = { viewModel.toggleFavorite(match.id) },
+                            isVisible = true
                         )
                     }
                 }
