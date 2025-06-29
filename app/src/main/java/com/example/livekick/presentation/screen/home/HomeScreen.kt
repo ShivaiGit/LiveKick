@@ -22,7 +22,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.livekick.domain.model.Match
+import com.example.livekick.domain.model.MatchStatus
 import com.example.livekick.presentation.component.MatchCard
+import com.example.livekick.presentation.component.SearchAndFilterBar
 import com.example.livekick.presentation.viewmodel.HomeViewModel
 import com.example.livekick.ui.theme.*
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -39,6 +41,22 @@ fun HomeScreen(
     val uiState by viewModel.uiState.collectAsState()
     val listState = rememberLazyListState()
     
+    // Состояние фильтров
+    var searchQuery by remember { mutableStateOf("") }
+    var selectedStatus by remember { mutableStateOf<MatchStatus?>(null) }
+    var selectedLeague by remember { mutableStateOf<String?>(null) }
+    
+    // Обновляем фильтры в ViewModel
+    LaunchedEffect(searchQuery) {
+        viewModel.updateSearchQuery(searchQuery)
+    }
+    LaunchedEffect(selectedStatus) {
+        viewModel.updateStatusFilter(selectedStatus)
+    }
+    LaunchedEffect(selectedLeague) {
+        viewModel.updateLeagueFilter(selectedLeague)
+    }
+    
     Scaffold(
         topBar = {
             HomeTopBar(
@@ -48,33 +66,52 @@ fun HomeScreen(
             )
         }
     ) { paddingValues ->
-        Box(
+        Column(
             modifier = modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            when {
-                uiState.isLoading && uiState.matches.isEmpty() -> {
-                    LoadingContent()
-                }
-                uiState.error != null -> {
-                    ErrorContent(
-                        error = uiState.error!!,
-                        onRetry = { viewModel.refreshMatches() }
-                    )
-                }
-                uiState.matches.isEmpty() -> {
-                    EmptyContent()
-                }
-                else -> {
-                    MatchesList(
-                        matches = uiState.matches,
-                        onMatchClick = onMatchClick,
-                        onToggleFavorite = { matchId ->
-                            viewModel.toggleFavorite(matchId)
-                        },
-                        listState = listState
-                    )
+            // Поиск и фильтры
+            SearchAndFilterBar(
+                searchQuery = searchQuery,
+                onSearchQueryChange = { searchQuery = it },
+                selectedStatus = selectedStatus,
+                onStatusFilterChange = { selectedStatus = it },
+                selectedLeague = selectedLeague,
+                onLeagueFilterChange = { selectedLeague = it },
+                availableLeagues = uiState.availableLeagues,
+                modifier = Modifier.padding(16.dp)
+            )
+            
+            // Список матчей
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .weight(1f)
+            ) {
+                when {
+                    uiState.isLoading && uiState.matches.isEmpty() -> {
+                        LoadingContent()
+                    }
+                    uiState.error != null -> {
+                        ErrorContent(
+                            error = uiState.error!!,
+                            onRetry = { viewModel.refreshMatches() }
+                        )
+                    }
+                    uiState.matches.isEmpty() -> {
+                        EmptyContent()
+                    }
+                    else -> {
+                        MatchesList(
+                            matches = uiState.matches,
+                            onMatchClick = onMatchClick,
+                            onToggleFavorite = { matchId ->
+                                viewModel.toggleFavorite(matchId)
+                            },
+                            listState = listState
+                        )
+                    }
                 }
             }
         }
