@@ -11,8 +11,6 @@ composeBom = "2024.09.00"
 navigationCompose = "2.8.1"
 retrofit = "2.11.0"
 okhttp = "4.12.0"
-hilt = "2.48.1"
-hiltNavigationCompose = "1.2.0"
 coroutines = "1.8.1"
 coil = "2.6.0"
 datastore = "1.1.0"
@@ -45,11 +43,6 @@ retrofit-converter-gson = { group = "com.squareup.retrofit2", name = "converter-
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
 
-# Dependency Injection
-hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
-hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
-
 # Coroutines
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
@@ -66,5 +59,4 @@ mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 

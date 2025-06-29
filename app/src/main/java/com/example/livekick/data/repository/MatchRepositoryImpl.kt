@@ -6,11 +6,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import java.time.LocalDateTime
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class MatchRepositoryImpl @Inject constructor() : MatchRepository {
+class MatchRepositoryImpl : MatchRepository {
     
     private val favoriteMatches = mutableSetOf<String>()
     

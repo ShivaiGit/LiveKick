@@ -1,8 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.hilt)
-    kotlin("kapt")
 }
 
 android {
@@ -65,11 +63,6 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.compose)
     
-    // Dependency Injection
-    implementation(libs.hilt.android)
-    kapt(libs.hilt.compiler)
-    implementation(libs.hilt.navigation.compose)
-    
     // Networking
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.gson)
@@ -101,10 +94,4 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-
-    implementation("com.squareup:javapoet:1.13.0")
-}
-
-kapt {
-    correctErrorTypes = true
 }

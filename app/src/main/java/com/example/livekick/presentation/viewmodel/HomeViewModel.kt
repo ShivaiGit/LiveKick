@@ -2,21 +2,19 @@ package com.example.livekick.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.livekick.data.repository.MatchRepositoryImpl
 import com.example.livekick.domain.model.Match
 import com.example.livekick.domain.usecase.GetLiveMatchesUseCase
 import com.example.livekick.domain.usecase.ToggleFavoriteMatchUseCase
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class HomeViewModel @Inject constructor(
-    private val getLiveMatchesUseCase: GetLiveMatchesUseCase,
-    private val toggleFavoriteMatchUseCase: ToggleFavoriteMatchUseCase
-) : ViewModel() {
+class HomeViewModel : ViewModel() {
+    
+    private val getLiveMatchesUseCase = GetLiveMatchesUseCase(MatchRepositoryImpl())
+    private val toggleFavoriteMatchUseCase = ToggleFavoriteMatchUseCase(MatchRepositoryImpl())
     
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
