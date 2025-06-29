@@ -8,8 +8,8 @@ import java.util.concurrent.TimeUnit
 
 object NetworkModule {
     
-    // API sstats.net
-    private const val BASE_URL = "https://api.sstats.net/"
+    // API AllSportsApi
+    private const val BASE_URL = "https://apiv3.apifootball.com/"
     
     private val okHttpClient = OkHttpClient.Builder()
         .addInterceptor(HttpLoggingInterceptor().apply {

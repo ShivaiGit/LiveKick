@@ -2,52 +2,33 @@ package com.example.livekick.data.remote
 
 import com.example.livekick.data.remote.dto.ApiFootballResponse
 import retrofit2.http.GET
-import retrofit2.http.Headers
-import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface ApiFootballService {
     
-    @Headers(
-        "X-API-Key: 5z5lfbzk0zkeh88r"
-    )
-    @GET("matches/live")
+    @GET("?APIkey=f81675edfc5e8e89f8a387158f1fc5dcdc34126b3b8deaa664d206019c0ba65d&action=get_live")
     suspend fun getLiveMatches(): ApiFootballResponse
     
-    @Headers(
-        "X-API-Key: 5z5lfbzk0zkeh88r"
-    )
-    @GET("matches")
+    @GET("?APIkey=f81675edfc5e8e89f8a387158f1fc5dcdc34126b3b8deaa664d206019c0ba65d&action=get_events")
     suspend fun getMatchesByDate(
-        @Query("date") date: String
+        @Query("from") dateFrom: String,
+        @Query("to") dateTo: String
     ): ApiFootballResponse
     
-    @Headers(
-        "X-API-Key: 5z5lfbzk0zkeh88r"
-    )
-    @GET("matches/{id}")
+    @GET("?APIkey=f81675edfc5e8e89f8a387158f1fc5dcdc34126b3b8deaa664d206019c0ba65d&action=get_events")
     suspend fun getMatchById(
-        @Path("id") matchId: String
+        @Query("match_id") matchId: String
     ): ApiFootballResponse
     
-    @Headers(
-        "X-API-Key: 5z5lfbzk0zkeh88r"
-    )
-    @GET("leagues/{id}/matches")
+    @GET("?APIkey=f81675edfc5e8e89f8a387158f1fc5dcdc34126b3b8deaa664d206019c0ba65d&action=get_events")
     suspend fun getMatchesByLeague(
-        @Path("id") leagueId: String
+        @Query("league_id") leagueId: String
     ): ApiFootballResponse
     
-    @Headers(
-        "X-API-Key: 5z5lfbzk0zkeh88r"
-    )
-    @GET("leagues")
+    @GET("?APIkey=f81675edfc5e8e89f8a387158f1fc5dcdc34126b3b8deaa664d206019c0ba65d&action=get_leagues")
     suspend fun getLeagues(): ApiFootballResponse
     
     // Тестовый эндпоинт для проверки API
-    @Headers(
-        "X-API-Key: 5z5lfbzk0zkeh88r"
-    )
-    @GET("")
+    @GET("?APIkey=f81675edfc5e8e89f8a387158f1fc5dcdc34126b3b8deaa664d206019c0ba65d&action=get_countries")
     suspend fun testApi(): ApiFootballResponse
 } 

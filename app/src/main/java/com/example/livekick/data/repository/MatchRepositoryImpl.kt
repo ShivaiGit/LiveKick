@@ -43,7 +43,7 @@ class MatchRepositoryImpl(
                 try {
                     Log.d("LiveKick", "Запрашиваем live матчи...")
                     val liveResponse = apiService.getLiveMatches()
-                    liveResponse.matches?.let { matchList ->
+                    liveResponse.result?.let { matchList ->
                         val matches = ApiFootballMapper.mapMatchResponseListToMatches(matchList)
                         liveMatches.addAll(matches)
                         Log.d("LiveKick", "Live матчи: ${matches.size}")
@@ -58,9 +58,10 @@ class MatchRepositoryImpl(
                         Log.d("LiveKick", "Запрашиваем сегодняшние матчи...")
                         val today = LocalDate.now()
                         val todayResponse = apiService.getMatchesByDate(
-                            date = today.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                            dateFrom = today.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                            dateTo = today.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
                         )
-                        todayResponse.matches?.let { matchList ->
+                        todayResponse.result?.let { matchList ->
                             val matches = ApiFootballMapper.mapMatchResponseListToMatches(matchList)
                             liveMatches.addAll(matches)
                             Log.d("LiveKick", "Сегодняшние матчи: ${matches.size}")
@@ -76,9 +77,10 @@ class MatchRepositoryImpl(
                         Log.d("LiveKick", "Запрашиваем завтрашние матчи...")
                         val tomorrow = LocalDate.now().plusDays(1)
                         val tomorrowResponse = apiService.getMatchesByDate(
-                            date = tomorrow.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                            dateFrom = tomorrow.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                            dateTo = tomorrow.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
                         )
-                        tomorrowResponse.matches?.let { matchList ->
+                        tomorrowResponse.result?.let { matchList ->
                             val matches = ApiFootballMapper.mapMatchResponseListToMatches(matchList)
                             liveMatches.addAll(matches)
                             Log.d("LiveKick", "Завтрашние матчи: ${matches.size}")
@@ -153,7 +155,7 @@ class MatchRepositoryImpl(
     override fun getMatchesByLeague(leagueId: String): Flow<List<Match>> = flow {
         try {
             val response = apiService.getMatchesByLeague(leagueId)
-            val matches = response.matches?.let { matchList ->
+            val matches = response.result?.let { matchList ->
                 ApiFootballMapper.mapMatchResponseListToMatches(matchList)
             } ?: emptyList()
             
@@ -171,7 +173,7 @@ class MatchRepositoryImpl(
     override fun getMatchById(matchId: String): Flow<Match?> = flow {
         try {
             val response = apiService.getMatchById(matchId)
-            val match = response.matches?.firstOrNull()?.let { matchResponse ->
+            val match = response.result?.firstOrNull()?.let { matchResponse ->
                 ApiFootballMapper.mapMatchResponseToMatch(matchResponse)
             }
             
