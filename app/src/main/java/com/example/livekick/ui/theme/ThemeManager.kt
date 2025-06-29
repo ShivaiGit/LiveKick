@@ -16,10 +16,6 @@ class ThemeManager {
     var themeMode by mutableStateOf(ThemeMode.SYSTEM)
         private set
     
-    fun setThemeMode(mode: ThemeMode) {
-        themeMode = mode
-    }
-    
     fun toggleTheme() {
         themeMode = when (themeMode) {
             ThemeMode.LIGHT -> ThemeMode.DARK

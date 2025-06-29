@@ -20,21 +20,26 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.livekick.data.repository.MatchRepositoryImpl
 import com.example.livekick.domain.model.Match
 import com.example.livekick.presentation.component.MatchCard
 import com.example.livekick.presentation.viewmodel.FavoritesViewModel
+import com.example.livekick.presentation.viewmodel.FavoritesViewModelFactory
 import com.example.livekick.ui.theme.*
 import androidx.compose.foundation.ExperimentalFoundationApi
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun FavoritesScreen(
+    matchRepository: MatchRepositoryImpl,
     onNavigateToMatch: (String) -> Unit,
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    val viewModel: FavoritesViewModel = viewModel { FavoritesViewModel(context) }
+    val viewModel: FavoritesViewModel = viewModel(
+        factory = FavoritesViewModelFactory(matchRepository)
+    )
     val uiState by viewModel.uiState.collectAsState()
     val listState = rememberLazyListState()
     

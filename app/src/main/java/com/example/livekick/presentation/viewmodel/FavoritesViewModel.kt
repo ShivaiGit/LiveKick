@@ -1,7 +1,7 @@
 package com.example.livekick.presentation.viewmodel
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.livekick.data.repository.MatchRepositoryImpl
 import com.example.livekick.domain.model.Match
@@ -12,10 +12,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class FavoritesViewModel(
-    private val context: Context
+    private val matchRepository: MatchRepository
 ) : ViewModel() {
-    
-    private val matchRepository: MatchRepository = MatchRepositoryImpl(context)
     
     private val _uiState = MutableStateFlow(FavoritesUiState())
     val uiState: StateFlow<FavoritesUiState> = _uiState.asStateFlow()
@@ -72,4 +70,17 @@ data class FavoritesUiState(
     val matches: List<Match> = emptyList(),
     val isLoading: Boolean = false,
     val error: String? = null
-) 
+)
+
+// Фабрика для создания FavoritesViewModel с репозиторием
+class FavoritesViewModelFactory(
+    private val matchRepository: MatchRepositoryImpl
+) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(FavoritesViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return FavoritesViewModel(matchRepository) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
+} 

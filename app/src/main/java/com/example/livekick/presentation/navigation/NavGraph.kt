@@ -10,6 +10,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.NavType
+import com.example.livekick.data.repository.MatchRepositoryImpl
 import com.example.livekick.presentation.screen.favorites.FavoritesScreen
 import com.example.livekick.presentation.screen.home.HomeScreen
 import com.example.livekick.presentation.screen.match.MatchDetailScreen
@@ -20,12 +21,13 @@ import com.example.livekick.presentation.screen.statistics.TeamStatisticsScreen
 @Composable
 fun NavGraph(
     navController: NavHostController,
+    matchRepository: MatchRepositoryImpl,
     startDestination: String = "home"
 ) {
     NavHost(
         navController = navController,
         startDestination = startDestination,
-        modifier = Modifier.fillMaxSize
+        modifier = Modifier.fillMaxSize()
     ) {
         composable(
             route = "home",
@@ -43,6 +45,7 @@ fun NavGraph(
             }
         ) {
             HomeScreen(
+                matchRepository = matchRepository,
                 onNavigateToMatch = { matchId ->
                     navController.navigate("match/$matchId")
                 },
@@ -61,7 +64,7 @@ fun NavGraph(
         composable(
             route = "match/{matchId}",
             arguments = listOf(
-                androidx.navigation.NavType.StringType
+                androidx.navigation.navArgument("matchId") { type = androidx.navigation.NavType.StringType }
             ),
             enterTransition = {
                 slideInVertically(
@@ -79,6 +82,7 @@ fun NavGraph(
             val matchId = backStackEntry.arguments?.getString("matchId") ?: ""
             MatchDetailScreen(
                 matchId = matchId,
+                matchRepository = matchRepository,
                 onNavigateBack = {
                     navController.popBackStack()
                 }
@@ -101,6 +105,7 @@ fun NavGraph(
             }
         ) {
             FavoritesScreen(
+                matchRepository = matchRepository,
                 onNavigateToMatch = { matchId ->
                     navController.navigate("match/$matchId")
                 },

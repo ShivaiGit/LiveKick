@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -113,11 +114,11 @@ fun TopTeamsCard() {
             Spacer(modifier = Modifier.height(12.dp))
             
             val topTeams = listOf(
-                TeamStats("Manchester City", 85, 28, 5, 5, 89, 33),
-                TeamStats("Arsenal", 81, 26, 6, 6, 88, 43),
-                TeamStats("Manchester United", 75, 23, 6, 9, 58, 43),
-                TeamStats("Newcastle", 71, 19, 14, 5, 68, 33),
-                TeamStats("Liverpool", 67, 19, 10, 9, 75, 47)
+                TeamStats("Manchester City", 85, 28, 5, 5, 5, 89, 33),
+                TeamStats("Arsenal", 81, 26, 6, 6, 6, 88, 43),
+                TeamStats("Manchester United", 75, 23, 6, 9, 9, 58, 43),
+                TeamStats("Newcastle", 71, 19, 14, 5, 5, 68, 33),
+                TeamStats("Liverpool", 67, 19, 10, 9, 9, 75, 47)
             )
             
             topTeams.forEachIndexed { index, team ->

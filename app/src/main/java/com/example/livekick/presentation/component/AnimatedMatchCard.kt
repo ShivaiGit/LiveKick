@@ -2,6 +2,7 @@ package com.example.livekick.presentation.component
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -13,13 +14,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.livekick.domain.model.Match
-import com.example.livekick.domain.model.MatchStatus
+import com.example.livekick.domain.model.*
+import kotlinx.coroutines.delay
 
 @Composable
 fun AnimatedMatchCard(
@@ -29,9 +31,8 @@ fun AnimatedMatchCard(
     modifier: Modifier = Modifier,
     isVisible: Boolean = true
 ) {
-    var isPressed by remember { mutableStateOf(false) }
     val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.95f else 1f,
+        targetValue = 1f,
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioMediumBouncy,
             stiffness = Spring.StiffnessLow
@@ -40,11 +41,6 @@ fun AnimatedMatchCard(
     
     val alpha by animateFloatAsState(
         targetValue = if (isVisible) 1f else 0f,
-        animationSpec = tween(durationMillis = 300)
-    )
-    
-    val slideInOffset by animateDpAsState(
-        targetValue = if (isVisible) 0.dp else 50.dp,
         animationSpec = tween(durationMillis = 300)
     )
     
@@ -66,17 +62,11 @@ fun AnimatedMatchCard(
         Card(
             modifier = modifier
                 .fillMaxWidth()
-                .graphicsLayer {
-                    scaleX = scale
-                    scaleY = scale
-                    alpha = alpha
-                    translationY = slideInOffset.value
-                }
                 .clickable {
                     onMatchClick()
                 },
             elevation = CardDefaults.cardElevation(
-                defaultElevation = if (isPressed) 2.dp else 4.dp
+                defaultElevation = 4.dp
             ),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(

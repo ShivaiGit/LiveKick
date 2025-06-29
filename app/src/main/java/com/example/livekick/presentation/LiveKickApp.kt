@@ -8,13 +8,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.livekick.data.repository.MatchRepositoryImpl
 import com.example.livekick.presentation.navigation.NavGraph
 import com.example.livekick.ui.theme.LiveKickTheme
 import com.example.livekick.ui.theme.LocalThemeManager
 import com.example.livekick.ui.theme.ThemeManager
 
 @Composable
-fun LiveKickApp() {
+fun LiveKickApp(matchRepository: MatchRepositoryImpl) {
     val themeManager = remember { ThemeManager() }
     val navController = rememberNavController()
     
@@ -28,6 +29,7 @@ fun LiveKickApp() {
             ) {
                 NavGraph(
                     navController = navController,
+                    matchRepository = matchRepository,
                     startDestination = "home"
                 )
             }

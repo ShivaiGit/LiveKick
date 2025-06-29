@@ -29,10 +29,6 @@ val Warning = Color(0xFFFF9800)
 val Error = Color(0xFFF44336)
 val Info = Color(0xFF2196F3)
 
-// Градиенты
-val GradientStart = Color(0xFF1E88E5)
-val GradientEnd = Color(0xFF1565C0)
-
 // Светлая тема
 val Purple40 = Color(0xFF6650a4)
 val PurpleGrey40 = Color(0xFF625b71)

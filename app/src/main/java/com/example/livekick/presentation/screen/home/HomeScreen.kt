@@ -27,6 +27,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.livekick.data.repository.MatchRepositoryImpl
 import com.example.livekick.domain.model.Match
 import com.example.livekick.domain.model.MatchStatus
 import com.example.livekick.presentation.component.MatchCard
@@ -41,8 +42,9 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(
+    matchRepository: MatchRepositoryImpl,
     viewModel: HomeViewModel = viewModel(
-        factory = HomeViewModelFactory(LocalContext.current)
+        factory = HomeViewModelFactory(matchRepository)
     ),
     onNavigateToMatch: (String) -> Unit,
     onNavigateToFavorites: () -> Unit,
@@ -84,11 +86,7 @@ fun HomeScreen(
                     onClick = { themeManager.toggleTheme() }
                 ) {
                     Icon(
-                        imageVector = if (themeManager.themeMode == com.example.livekick.ui.theme.ThemeMode.DARK) {
-                            Icons.Default.LightMode
-                        } else {
-                            Icons.Default.DarkMode
-                        },
+                        imageVector = Icons.Default.Info,
                         contentDescription = "Переключить тему",
                         tint = MaterialTheme.colorScheme.primary
                     )
@@ -128,7 +126,7 @@ fun HomeScreen(
                     onClick = onNavigateToStatistics
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Analytics,
+                        imageVector = Icons.Default.Info,
                         contentDescription = "Статистика",
                         tint = MaterialTheme.colorScheme.primary
                     )
@@ -248,7 +246,7 @@ fun HomeScreen(
                         AnimatedMatchCard(
                             match = match,
                             onMatchClick = { onNavigateToMatch(match.id) },
-                            onFavoriteClick = { viewModel.toggleFavorite(match.id) },
+                            onFavoriteClick = { viewModel.onToggleFavorite(match) },
                             isVisible = true
                         )
                     }

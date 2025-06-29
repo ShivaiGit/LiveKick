@@ -176,16 +176,14 @@ data class HomeUiState(
         get() = allMatches.map { it.league.name }.distinct().sorted()
 }
 
-// Фабрика для создания HomeViewModel с контекстом
+// Фабрика для создания HomeViewModel с репозиторием
 class HomeViewModelFactory(
-    private val context: Context
+    private val matchRepository: MatchRepositoryImpl
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(HomeViewModel::class.java)) {
-            val localRepository = LocalMatchRepository(AppDatabase.getDatabase(context))
-            val remoteRepository = MatchRepositoryImpl(context)
-            val getLiveMatchesUseCase = GetLiveMatchesUseCase(remoteRepository)
-            val toggleFavoriteMatchUseCase = ToggleFavoriteMatchUseCase(remoteRepository)
+            val getLiveMatchesUseCase = GetLiveMatchesUseCase(matchRepository)
+            val toggleFavoriteMatchUseCase = ToggleFavoriteMatchUseCase(matchRepository)
             
             @Suppress("UNCHECKED_CAST")
             return HomeViewModel(getLiveMatchesUseCase, toggleFavoriteMatchUseCase) as T

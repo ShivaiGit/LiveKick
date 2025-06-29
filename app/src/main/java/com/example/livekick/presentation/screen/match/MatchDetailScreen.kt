@@ -17,12 +17,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.livekick.data.repository.MatchRepositoryImpl
 import com.example.livekick.domain.model.*
 import com.example.livekick.presentation.component.MatchCard
 import com.example.livekick.presentation.component.LiveMatchStats
 import com.example.livekick.presentation.component.MatchProgressBar
 import com.example.livekick.presentation.component.AdvancedMatchStats
 import com.example.livekick.presentation.viewmodel.MatchDetailViewModel
+import com.example.livekick.presentation.viewmodel.MatchDetailViewModelFactory
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -30,8 +32,11 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun MatchDetailScreen(
     matchId: String,
+    matchRepository: MatchRepositoryImpl,
     onNavigateBack: () -> Unit,
-    viewModel: MatchDetailViewModel = viewModel { MatchDetailViewModel() }
+    viewModel: MatchDetailViewModel = viewModel(
+        factory = MatchDetailViewModelFactory(matchRepository)
+    )
 ) {
     val uiState by viewModel.uiState.collectAsState()
     
@@ -97,7 +102,7 @@ fun MatchDetailScreen(
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Error,
+                            imageVector = Icons.Default.Warning,
                             contentDescription = null,
                             modifier = Modifier.size(64.dp),
                             tint = MaterialTheme.colorScheme.error
@@ -505,10 +510,10 @@ fun EventItem(event: MatchEvent) {
 @Composable
 fun EventIcon(eventType: EventType) {
     val (icon, color) = when (eventType) {
-        EventType.GOAL -> Pair(Icons.Default.Sports, MaterialTheme.colorScheme.primary)
+        EventType.GOAL -> Pair(Icons.Default.Star, MaterialTheme.colorScheme.primary)
         EventType.YELLOW_CARD -> Pair(Icons.Default.Warning, MaterialTheme.colorScheme.tertiary)
-        EventType.RED_CARD -> Pair(Icons.Default.Error, MaterialTheme.colorScheme.error)
-        EventType.SUBSTITUTION -> Pair(Icons.Default.SwapHoriz, MaterialTheme.colorScheme.secondary)
+        EventType.RED_CARD -> Pair(Icons.Default.Warning, MaterialTheme.colorScheme.error)
+        EventType.SUBSTITUTION -> Pair(Icons.Default.Refresh, MaterialTheme.colorScheme.secondary)
         EventType.CORNER -> Pair(Icons.Default.Info, MaterialTheme.colorScheme.outline)
         EventType.FOUL -> Pair(Icons.Default.Warning, MaterialTheme.colorScheme.tertiary)
     }

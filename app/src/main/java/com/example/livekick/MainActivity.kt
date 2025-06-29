@@ -13,6 +13,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
+import com.example.livekick.data.repository.MatchRepositoryImpl
 import com.example.livekick.notification.NotificationScheduler
 import com.example.livekick.presentation.LiveKickApp
 import com.example.livekick.ui.theme.LiveKickTheme
@@ -22,6 +23,7 @@ import com.example.livekick.ui.theme.LiveKickTheme
 class MainActivity : ComponentActivity() {
     
     private lateinit var notificationScheduler: NotificationScheduler
+    private lateinit var matchRepository: MatchRepositoryImpl
     
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -34,6 +36,9 @@ class MainActivity : ComponentActivity() {
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Инициализируем репозиторий с контекстом
+        matchRepository = MatchRepositoryImpl(this)
         
         notificationScheduler = NotificationScheduler(this)
         
@@ -49,7 +54,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    LiveKickApp()
+                    LiveKickApp(matchRepository = matchRepository)
                 }
             }
         }

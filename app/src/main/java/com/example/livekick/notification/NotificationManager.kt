@@ -1,13 +1,16 @@
 package com.example.livekick.notification
 
+import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import com.example.livekick.MainActivity
 import com.example.livekick.R
 import com.example.livekick.domain.model.Match
@@ -27,6 +30,17 @@ class LiveKickNotificationManager(private val context: Context) {
     
     init {
         createNotificationChannels()
+    }
+    
+    private fun hasNotificationPermission(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+        } else {
+            true // Для старых версий Android разрешение не требуется
+        }
     }
     
     private fun createNotificationChannels() {
@@ -66,6 +80,10 @@ class LiveKickNotificationManager(private val context: Context) {
     }
     
     fun showMatchStartNotification(match: Match) {
+        if (!hasNotificationPermission()) {
+            return
+        }
+        
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             putExtra("matchId", match.id)
@@ -89,13 +107,21 @@ class LiveKickNotificationManager(private val context: Context) {
             .setContentIntent(pendingIntent)
             .build()
         
-        NotificationManagerCompat.from(context).notify(
-            NOTIFICATION_ID_MATCH_START + match.id.hashCode(),
-            notification
-        )
+        try {
+            NotificationManagerCompat.from(context).notify(
+                NOTIFICATION_ID_MATCH_START + match.id.hashCode(),
+                notification
+            )
+        } catch (e: SecurityException) {
+            // Разрешение не предоставлено
+        }
     }
     
     fun showMatchEventNotification(match: Match, event: String) {
+        if (!hasNotificationPermission()) {
+            return
+        }
+        
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             putExtra("matchId", match.id)
@@ -119,13 +145,21 @@ class LiveKickNotificationManager(private val context: Context) {
             .setContentIntent(pendingIntent)
             .build()
         
-        NotificationManagerCompat.from(context).notify(
-            NOTIFICATION_ID_MATCH_EVENTS + match.id.hashCode(),
-            notification
-        )
+        try {
+            NotificationManagerCompat.from(context).notify(
+                NOTIFICATION_ID_MATCH_EVENTS + match.id.hashCode(),
+                notification
+            )
+        } catch (e: SecurityException) {
+            // Разрешение не предоставлено
+        }
     }
     
     fun showGeneralNotification(title: String, message: String) {
+        if (!hasNotificationPermission()) {
+            return
+        }
+        
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
@@ -146,19 +180,31 @@ class LiveKickNotificationManager(private val context: Context) {
             .setContentIntent(pendingIntent)
             .build()
         
-        NotificationManagerCompat.from(context).notify(
-            NOTIFICATION_ID_GENERAL,
-            notification
-        )
+        try {
+            NotificationManagerCompat.from(context).notify(
+                NOTIFICATION_ID_GENERAL,
+                notification
+            )
+        } catch (e: SecurityException) {
+            // Разрешение не предоставлено
+        }
     }
     
     fun cancelMatchNotifications(matchId: String) {
-        val notificationManager = NotificationManagerCompat.from(context)
-        notificationManager.cancel(NOTIFICATION_ID_MATCH_START + matchId.hashCode())
-        notificationManager.cancel(NOTIFICATION_ID_MATCH_EVENTS + matchId.hashCode())
+        try {
+            val notificationManager = NotificationManagerCompat.from(context)
+            notificationManager.cancel(NOTIFICATION_ID_MATCH_START + matchId.hashCode())
+            notificationManager.cancel(NOTIFICATION_ID_MATCH_EVENTS + matchId.hashCode())
+        } catch (e: SecurityException) {
+            // Разрешение не предоставлено
+        }
     }
     
     fun cancelAllNotifications() {
-        NotificationManagerCompat.from(context).cancelAll()
+        try {
+            NotificationManagerCompat.from(context).cancelAll()
+        } catch (e: SecurityException) {
+            // Разрешение не предоставлено
+        }
     }
 } 

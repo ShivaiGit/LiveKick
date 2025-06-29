@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.livekick.domain.model.Match
 import com.example.livekick.domain.model.MatchStatus
+import kotlinx.coroutines.delay
 
 @Composable
 fun LiveMatchStats(
@@ -194,13 +195,17 @@ fun MatchProgressBar(
         
         Spacer(modifier = Modifier.height(4.dp))
         
-        Text(
-            text = "${match.minute ?: 0}'",
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        )
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "${match.minute ?: 0}'",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
     }
 }
 
@@ -248,8 +253,7 @@ fun TeamStatsComparison(
                     text = awayTeam,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
-                    modifier = Modifier.weight(1f),
-                    modifier = Modifier.align(Alignment.End)
+                    modifier = Modifier.weight(1f)
                 )
             }
             
