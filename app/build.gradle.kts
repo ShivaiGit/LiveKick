@@ -91,6 +91,12 @@ dependencies {
     // Animations
     implementation(libs.lottie.compose)
     
+    // Dependency Injection
+    // implementation(libs.hilt.android)
+    // ksp(libs.hilt.compiler)
+    // implementation(libs.hilt.navigation.compose)
+    // implementation("com.squareup:javapoet:1.13.0")
+    
     // Testing
     testImplementation(libs.junit)
     testImplementation(libs.mockk)

@@ -1,0 +1,40 @@
+package com.example.livekick.di
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import com.example.livekick.data.repository.MatchRepositoryImpl
+import com.example.livekick.domain.repository.MatchRepository
+import com.example.livekick.domain.usecase.GetLiveMatchesUseCase
+import com.example.livekick.domain.usecase.GetMatchByIdUseCase
+import com.example.livekick.domain.usecase.ToggleFavoriteMatchUseCase
+import com.example.livekick.presentation.viewmodel.HomeViewModel
+import com.example.livekick.presentation.viewmodel.MatchDetailViewModel
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ViewModelComponent
+import dagger.hilt.android.scopes.ViewModelScoped
+import javax.inject.Singleton
+
+@Module
+@InstallIn(ViewModelComponent::class)
+object ViewModelModule {
+    
+    @Provides
+    @ViewModelScoped
+    fun provideGetLiveMatchesUseCase(repository: MatchRepository): GetLiveMatchesUseCase {
+        return GetLiveMatchesUseCase(repository)
+    }
+    
+    @Provides
+    @ViewModelScoped
+    fun provideGetMatchByIdUseCase(repository: MatchRepository): GetMatchByIdUseCase {
+        return GetMatchByIdUseCase(repository)
+    }
+    
+    @Provides
+    @ViewModelScoped
+    fun provideToggleFavoriteMatchUseCase(repository: MatchRepository): ToggleFavoriteMatchUseCase {
+        return ToggleFavoriteMatchUseCase(repository)
+    }
+} 
