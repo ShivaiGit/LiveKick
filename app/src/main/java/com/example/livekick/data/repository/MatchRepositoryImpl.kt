@@ -1,33 +1,98 @@
 package com.example.livekick.data.repository
 
+import android.util.Log
+import com.example.livekick.data.remote.NetworkModule
+import com.example.livekick.data.remote.mapper.ApiFootballMapper
 import com.example.livekick.domain.model.*
 import com.example.livekick.domain.repository.MatchRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 class MatchRepositoryImpl : MatchRepository {
     
     private val favoriteMatches = mutableSetOf<String>()
+    private val apiService = NetworkModule.apiFootballService
     
     override fun getLiveMatches(): Flow<List<Match>> = flow {
         while (true) {
-            emit(generateLiveMatches())
+            try {
+                Log.d("LiveKick", "Запрашиваем живые матчи...")
+                val response = apiService.getLiveMatches()
+                Log.d("LiveKick", "Получен ответ: ${response.results} матчей")
+                
+                val matches = response.response?.let { fixtures ->
+                    Log.d("LiveKick", "Обрабатываем ${fixtures.size} матчей")
+                    ApiFootballMapper.mapFixtureResponseListToMatches(fixtures)
+                } ?: emptyList()
+                
+                // Добавляем статус избранного к матчам
+                val matchesWithFavorites = matches.map { match ->
+                    match.copy(isFavorite = favoriteMatches.contains(match.id))
+                }
+                
+                Log.d("LiveKick", "Отправляем ${matchesWithFavorites.size} матчей в UI")
+                emit(matchesWithFavorites)
+            } catch (e: Exception) {
+                Log.e("LiveKick", "Ошибка API: ${e.message}", e)
+                // В случае ошибки API возвращаем заглушечные данные
+                emit(generateFallbackMatches())
+            }
+            
             delay(30000) // Обновляем каждые 30 секунд
         }
     }
     
     override fun getMatchesByLeague(leagueId: String): Flow<List<Match>> = flow {
-        emit(generateLiveMatches().filter { it.league.id == leagueId })
+        try {
+            val response = apiService.getMatchesByLeague(leagueId = leagueId)
+            val matches = response.response?.let { fixtures ->
+                ApiFootballMapper.mapFixtureResponseListToMatches(fixtures)
+            } ?: emptyList()
+            
+            val matchesWithFavorites = matches.map { match ->
+                match.copy(isFavorite = favoriteMatches.contains(match.id))
+            }
+            
+            emit(matchesWithFavorites)
+        } catch (e: Exception) {
+            Log.e("LiveKick", "Ошибка получения матчей по лиге: ${e.message}", e)
+            emit(emptyList())
+        }
     }
     
     override fun getMatchById(matchId: String): Flow<Match?> = flow {
-        emit(generateLiveMatches().find { it.id == matchId })
+        try {
+            val response = apiService.getMatchById(matchId)
+            val match = response.response?.firstOrNull()?.let { fixture ->
+                ApiFootballMapper.mapFixtureResponseToMatch(fixture)
+            }
+            
+            val matchWithFavorite = match?.copy(isFavorite = favoriteMatches.contains(matchId))
+            emit(matchWithFavorite)
+        } catch (e: Exception) {
+            Log.e("LiveKick", "Ошибка получения матча по ID: ${e.message}", e)
+            emit(null)
+        }
     }
     
     override fun getFavoriteMatches(): Flow<List<Match>> = flow {
-        emit(generateLiveMatches().filter { favoriteMatches.contains(it.id) })
+        try {
+            val response = apiService.getLiveMatches()
+            val allMatches = response.response?.let { fixtures ->
+                ApiFootballMapper.mapFixtureResponseListToMatches(fixtures)
+            } ?: emptyList()
+            
+            val favoriteMatchesList = allMatches.filter { favoriteMatches.contains(it.id) }
+                .map { it.copy(isFavorite = true) }
+            
+            emit(favoriteMatchesList)
+        } catch (e: Exception) {
+            Log.e("LiveKick", "Ошибка получения избранных матчей: ${e.message}", e)
+            emit(emptyList())
+        }
     }
     
     override suspend fun toggleFavorite(matchId: String) {
@@ -39,11 +104,13 @@ class MatchRepositoryImpl : MatchRepository {
     }
     
     override suspend fun refreshMatches() {
-        // В реальном приложении здесь будет обновление данных с сервера
+        // Обновление происходит автоматически в getLiveMatches()
         delay(1000)
     }
     
-    private fun generateLiveMatches(): List<Match> {
+    // Заглушечные данные на случай ошибки API
+    private fun generateFallbackMatches(): List<Match> {
+        Log.d("LiveKick", "Используем заглушечные данные")
         val teams = listOf(
             Team("1", "Реал Мадрид", "РМ", "https://example.com/real.png"),
             Team("2", "Барселона", "БАР", "https://example.com/barca.png"),
