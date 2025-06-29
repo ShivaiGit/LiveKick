@@ -109,7 +109,7 @@ fun NotificationSettingsScreen(
             // Настройки времени
             NotificationSection(
                 title = "Время уведомлений",
-                icon = Icons.Default.Schedule
+                icon = Icons.Default.Info
             ) {
                 SwitchPreference(
                     title = "Тихий режим",
