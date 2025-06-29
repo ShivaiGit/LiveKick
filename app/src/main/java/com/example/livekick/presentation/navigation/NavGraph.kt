@@ -9,6 +9,7 @@ import androidx.navigation.NavType
 import com.example.livekick.presentation.screen.favorites.FavoritesScreen
 import com.example.livekick.presentation.screen.home.HomeScreen
 import com.example.livekick.presentation.screen.match.MatchDetailScreen
+import com.example.livekick.presentation.screen.settings.NotificationSettingsScreen
 
 @Composable
 fun NavGraph(
@@ -26,6 +27,9 @@ fun NavGraph(
                 },
                 onNavigateToFavorites = {
                     navController.navigate("favorites")
+                },
+                onNavigateToSettings = {
+                    navController.navigate("settings")
                 }
             )
         }
@@ -35,6 +39,14 @@ fun NavGraph(
                 onNavigateToMatch = { matchId ->
                     navController.navigate("match/$matchId")
                 },
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+        
+        composable("settings") {
+            NotificationSettingsScreen(
                 onNavigateBack = {
                     navController.popBackStack()
                 }

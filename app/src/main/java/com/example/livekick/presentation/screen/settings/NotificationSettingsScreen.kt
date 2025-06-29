@@ -1,0 +1,248 @@
+package com.example.livekick.presentation.screen.settings
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.livekick.presentation.viewmodel.NotificationSettingsViewModel
+import com.example.livekick.presentation.viewmodel.NotificationSettingsViewModelFactory
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun NotificationSettingsScreen(
+    onNavigateBack: () -> Unit,
+    viewModel: NotificationSettingsViewModel = viewModel(
+        factory = NotificationSettingsViewModelFactory(LocalContext.current)
+    )
+) {
+    val uiState by viewModel.uiState.collectAsState()
+    
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = "Настройки уведомлений",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Назад"
+                        )
+                    }
+                }
+            )
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState())
+        ) {
+            // Общие настройки уведомлений
+            NotificationSection(
+                title = "Общие уведомления",
+                icon = Icons.Default.Notifications
+            ) {
+                SwitchPreference(
+                    title = "Включить уведомления",
+                    subtitle = "Получать уведомления о матчах",
+                    checked = uiState.notificationsEnabled,
+                    onCheckedChange = viewModel::setNotificationsEnabled
+                )
+                
+                if (uiState.notificationsEnabled) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    SwitchPreference(
+                        title = "Уведомления о начале матчей",
+                        subtitle = "Получать уведомления за 5 минут до начала",
+                        checked = uiState.matchStartNotifications,
+                        onCheckedChange = viewModel::setMatchStartNotifications
+                    )
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    SwitchPreference(
+                        title = "Уведомления о событиях",
+                        subtitle = "Получать уведомления о голах и карточках",
+                        checked = uiState.eventNotifications,
+                        onCheckedChange = viewModel::setEventNotifications
+                    )
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            // Настройки избранных команд
+            NotificationSection(
+                title = "Избранные команды",
+                icon = Icons.Default.Favorite
+            ) {
+                SwitchPreference(
+                    title = "Уведомления только для избранных",
+                    subtitle = "Получать уведомления только о матчах избранных команд",
+                    checked = uiState.favoritesOnly,
+                    onCheckedChange = viewModel::setFavoritesOnly
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            // Настройки времени
+            NotificationSection(
+                title = "Время уведомлений",
+                icon = Icons.Default.Schedule
+            ) {
+                SwitchPreference(
+                    title = "Тихий режим",
+                    subtitle = "Не беспокоить в определенное время",
+                    checked = uiState.quietModeEnabled,
+                    onCheckedChange = viewModel::setQuietModeEnabled
+                )
+                
+                if (uiState.quietModeEnabled) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    Text(
+                        text = "Тихий режим: ${uiState.quietModeStart} - ${uiState.quietModeEnd}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            // Кнопка тестирования
+            Button(
+                onClick = viewModel::testNotification,
+                modifier = Modifier.fillMaxWidth(),
+                enabled = uiState.notificationsEnabled
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Notifications,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Тест уведомления")
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            // Статус
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(
+                        text = "Статус уведомлений",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = if (uiState.notificationsEnabled) {
+                            "✅ Уведомления включены"
+                        } else {
+                            "❌ Уведомления отключены"
+                        },
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun NotificationSection(
+    title: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    content: @Composable () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            content()
+        }
+    }
+}
+
+@Composable
+private fun SwitchPreference(
+    title: String,
+    subtitle: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(
+            modifier = Modifier.weight(1f)
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Medium
+            )
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange
+        )
+    }
+} 

@@ -42,7 +42,8 @@ fun HomeScreen(
         factory = HomeViewModelFactory(LocalContext.current)
     ),
     onNavigateToMatch: (String) -> Unit,
-    onNavigateToFavorites: () -> Unit
+    onNavigateToFavorites: () -> Unit,
+    onNavigateToSettings: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
@@ -89,6 +90,16 @@ fun HomeScreen(
                     Icon(
                         imageVector = Icons.Default.Favorite,
                         contentDescription = "Избранное",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+                
+                IconButton(
+                    onClick = onNavigateToSettings
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Settings,
+                        contentDescription = "Настройки",
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
