@@ -445,12 +445,109 @@ fun MatchEventsBlock(events: List<MatchEventResponse>) {
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
         Column(Modifier.padding(16.dp)) {
-            Text("События матча", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            Text("Таймлайн событий", fontWeight = FontWeight.Bold, fontSize = 16.sp)
             Spacer(Modifier.height(8.dp))
-            events.forEach { event ->
-                Text("${event.minute ?: "-"}' ${event.type}: ${event.playerName ?: ""} (${event.teamName ?: ""})")
+            if (events.isEmpty()) {
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    Text("Нет событий в этом матче", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            } else {
+                val sortedEvents = events.sortedBy { it.minute ?: 0 }
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    sortedEvents.forEachIndexed { idx, event ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            // Линия таймлайна
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier.width(32.dp)
+                            ) {
+                                if (idx != 0) {
+                                    Box(
+                                        modifier = Modifier
+                                            .width(2.dp)
+                                            .height(12.dp)
+                                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
+                                    )
+                                }
+                                EventIcon(event.type)
+                                if (idx != events.lastIndex) {
+                                    Box(
+                                        modifier = Modifier
+                                            .width(2.dp)
+                                            .height(12.dp)
+                                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
+                                    )
+                                }
+                            }
+                            Spacer(Modifier.width(8.dp))
+                            Column {
+                                Text(
+                                    text = "${event.minute ?: "-"}'",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 14.sp,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                Text(
+                                    text = eventDescription(event),
+                                    fontSize = 14.sp,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                if (!event.playerName.isNullOrBlank()) {
+                                    Text(
+                                        text = event.playerName + (if (!event.teamName.isNullOrBlank()) " (${event.teamName})" else ""),
+                                        fontSize = 13.sp,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                } else if (!event.teamName.isNullOrBlank()) {
+                                    Text(
+                                        text = event.teamName,
+                                        fontSize = 13.sp,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
+                        if (idx != events.lastIndex) {
+                            Spacer(Modifier.height(12.dp))
+                        }
+                    }
+                }
             }
         }
+    }
+}
+
+@Composable
+private fun EventIcon(type: String?) {
+    val (icon, tint) = when (type?.lowercase()) {
+        "goal" -> Icons.Default.SportsSoccer to MaterialTheme.colorScheme.primary
+        "yellowcard" -> Icons.Default.Warning to Color(0xFFFFD600)
+        "redcard" -> Icons.Default.Warning to Color(0xFFD32F2F)
+        "substitution" -> Icons.Default.SwapHoriz to MaterialTheme.colorScheme.tertiary
+        "corner" -> Icons.Default.Flag to MaterialTheme.colorScheme.secondary
+        "foul" -> Icons.Default.Block to MaterialTheme.colorScheme.error
+        else -> Icons.Default.Info to MaterialTheme.colorScheme.onSurfaceVariant
+    }
+    Icon(
+        imageVector = icon,
+        contentDescription = null,
+        tint = tint,
+        modifier = Modifier.size(20.dp)
+    )
+}
+
+private fun eventDescription(event: MatchEventResponse): String {
+    return when (event.type?.lowercase()) {
+        "goal" -> "Гол"
+        "yellowcard" -> "Жёлтая карточка"
+        "redcard" -> "Красная карточка"
+        "substitution" -> "Замена"
+        "corner" -> "Угловой"
+        "foul" -> "Нарушение"
+        else -> event.type ?: "Событие"
     }
 }
 
