@@ -12,6 +12,11 @@ enum class ThemeMode {
     SYSTEM
 }
 
+enum class Language {
+    RU,
+    EN
+}
+
 class ThemeManager {
     var themeMode by mutableStateOf(ThemeMode.SYSTEM)
         private set
@@ -32,7 +37,7 @@ class ThemeManager {
         }
     }
 
-    fun setThemeMode(mode: ThemeMode) {
+    fun updateThemeMode(mode: ThemeMode) {
         themeMode = mode
     }
 }

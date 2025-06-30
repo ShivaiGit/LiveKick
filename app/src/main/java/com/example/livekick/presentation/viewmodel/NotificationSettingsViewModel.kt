@@ -6,10 +6,13 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.livekick.notification.LiveKickNotificationManager
 import com.example.livekick.notification.NotificationScheduler
+import com.example.livekick.data.local.repository.UserPreferencesDataStore
+import com.example.livekick.ui.theme.Language
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.collect
 
 class NotificationSettingsViewModel(
     private val context: Context
@@ -17,12 +20,14 @@ class NotificationSettingsViewModel(
     
     private val notificationManager = LiveKickNotificationManager(context)
     private val notificationScheduler = NotificationScheduler(context)
+    private val userPrefs = UserPreferencesDataStore(context)
     
     private val _uiState = MutableStateFlow(NotificationSettingsUiState())
     val uiState: StateFlow<NotificationSettingsUiState> = _uiState.asStateFlow()
     
     init {
         loadSettings()
+        observeLanguage()
     }
     
     private fun loadSettings() {
@@ -37,6 +42,14 @@ class NotificationSettingsViewModel(
             quietModeStart = "22:00",
             quietModeEnd = "08:00"
         )
+    }
+    
+    private fun observeLanguage() {
+        viewModelScope.launch {
+            userPrefs.languageFlow.collect { lang ->
+                _uiState.value = _uiState.value.copy(language = lang)
+            }
+        }
     }
     
     fun setNotificationsEnabled(enabled: Boolean) {
@@ -81,6 +94,12 @@ class NotificationSettingsViewModel(
         }
     }
     
+    fun setLanguage(language: Language) {
+        viewModelScope.launch {
+            userPrefs.setLanguage(language)
+        }
+    }
+    
     private fun saveSettings() {
         // В реальном приложении здесь сохранялись бы настройки в DataStore
         viewModelScope.launch {
@@ -96,7 +115,8 @@ data class NotificationSettingsUiState(
     val favoritesOnly: Boolean = false,
     val quietModeEnabled: Boolean = false,
     val quietModeStart: String = "22:00",
-    val quietModeEnd: String = "08:00"
+    val quietModeEnd: String = "08:00",
+    val language: Language = Language.EN
 )
 
 class NotificationSettingsViewModelFactory(

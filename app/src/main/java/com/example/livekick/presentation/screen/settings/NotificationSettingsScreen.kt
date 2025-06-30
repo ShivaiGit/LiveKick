@@ -72,6 +72,17 @@ fun NotificationSettingsScreen(
                 ThemeSelector(themeManager)
             }
             Spacer(modifier = Modifier.height(24.dp))
+            // Секция выбора языка
+            NotificationSection(
+                title = "Язык интерфейса",
+                icon = Icons.Default.Language
+            ) {
+                LanguageSelector(
+                    selected = uiState.language,
+                    onSelect = viewModel::setLanguage
+                )
+            }
+            Spacer(modifier = Modifier.height(24.dp))
             // Общие настройки уведомлений
             NotificationSection(
                 title = "Общие уведомления",
@@ -307,23 +318,43 @@ private fun ThemeSelector(themeManager: com.example.livekick.ui.theme.ThemeManag
         Row(verticalAlignment = Alignment.CenterVertically) {
             RadioButton(
                 selected = current == ThemeMode.LIGHT,
-                onClick = { themeManager.setThemeMode(ThemeMode.LIGHT) }
+                onClick = { themeManager.updateThemeMode(ThemeMode.LIGHT) }
             )
             Text("Светлая", modifier = Modifier.padding(start = 4.dp))
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
             RadioButton(
                 selected = current == ThemeMode.DARK,
-                onClick = { themeManager.setThemeMode(ThemeMode.DARK) }
+                onClick = { themeManager.updateThemeMode(ThemeMode.DARK) }
             )
             Text("Тёмная", modifier = Modifier.padding(start = 4.dp))
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
             RadioButton(
                 selected = current == ThemeMode.SYSTEM,
-                onClick = { themeManager.setThemeMode(ThemeMode.SYSTEM) }
+                onClick = { themeManager.updateThemeMode(ThemeMode.SYSTEM) }
             )
             Text("Системная", modifier = Modifier.padding(start = 4.dp))
+        }
+    }
+}
+
+@Composable
+private fun LanguageSelector(selected: com.example.livekick.ui.theme.Language, onSelect: (com.example.livekick.ui.theme.Language) -> Unit) {
+    Column {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            RadioButton(
+                selected = selected == com.example.livekick.ui.theme.Language.RU,
+                onClick = { onSelect(com.example.livekick.ui.theme.Language.RU) }
+            )
+            Text("Русский", modifier = Modifier.padding(start = 4.dp))
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            RadioButton(
+                selected = selected == com.example.livekick.ui.theme.Language.EN,
+                onClick = { onSelect(com.example.livekick.ui.theme.Language.EN) }
+            )
+            Text("English", modifier = Modifier.padding(start = 4.dp))
         }
     }
 } 
