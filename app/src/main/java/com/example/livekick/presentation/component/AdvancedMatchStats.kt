@@ -44,33 +44,21 @@ fun AdvancedMatchStats(
             Spacer(modifier = Modifier.height(16.dp))
             
             if (statistics != null) {
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    item {
-                        PossessionChart(statistics.possession)
-                    }
-                    
-                    item {
-                        ShotAnalysis(statistics.shots)
-                    }
-                    
-                    item {
-                        PassAnalysis(statistics.passes)
-                    }
-                    
-                    item {
-                        CardAnalysis(statistics.cards)
-                    }
-                    
-                    item {
-                        OtherStats(
-                            corners = statistics.corners,
-                            fouls = statistics.fouls,
-                            offsides = statistics.offsides,
-                            saves = statistics.saves
-                        )
-                    }
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    PossessionChart(statistics.possession)
+                    Divider(thickness = 1.dp)
+                    ShotAnalysis(statistics.shots)
+                    Divider(thickness = 1.dp)
+                    PassAnalysis(statistics.passes)
+                    Divider(thickness = 1.dp)
+                    CardAnalysis(statistics.cards)
+                    Divider(thickness = 1.dp)
+                    OtherStats(
+                        corners = statistics.corners,
+                        fouls = statistics.fouls,
+                        offsides = statistics.offsides,
+                        saves = statistics.saves
+                    )
                 }
             } else {
                 // Показываем базовую статистику из матча

@@ -10,69 +10,75 @@ import java.time.format.DateTimeFormatter
 
 object ApiFootballMapper {
     
-    fun mapMatchResponseToMatch(matchResponse: MatchResponse): Match {
+    fun mapMatchResponseToMatch(matchResponse: MatchResponse): Match? {
         try {
-            Log.d("LiveKick", "Маппинг матча: ${matchResponse.id}")
-            Log.d("LiveKick", "Домашняя команда: ${matchResponse.teams.home.name}")
-            Log.d("LiveKick", "Гостевая команда: ${matchResponse.teams.away.name}")
-            Log.d("LiveKick", "Счет: ${matchResponse.goals.home} - ${matchResponse.goals.away}")
-            Log.d("LiveKick", "Статус: ${matchResponse.status.long}")
-            Log.d("LiveKick", "Elapsed: ${matchResponse.status.elapsed}")
-            
+            // Проверяем, что есть минимально необходимые данные
+            val homeId = matchResponse.homeTeamId
+            val homeName = matchResponse.homeTeamName
+            val awayId = matchResponse.awayTeamId
+            val awayName = matchResponse.awayTeamName
+            val homeScore = matchResponse.homeTeamScore?.current
+            val awayScore = matchResponse.awayTeamScore?.current
+            val leagueId = matchResponse.leagueId
+            val leagueName = matchResponse.leagueName
+            val status = matchResponse.status
+            val statusType = matchResponse.statusType
+            val startTime = matchResponse.startTime
+            if (homeId == null || homeName == null || awayId == null || awayName == null || leagueId == null || leagueName == null || status == null || startTime == null) {
+                Log.w("LiveKick", "Match ${matchResponse.id} пропущен из-за отсутствия обязательных данных")
+                return null
+            }
             return Match(
                 id = matchResponse.id.toString(),
-                homeTeam = mapHomeTeam(matchResponse),
-                awayTeam = mapAwayTeam(matchResponse),
-                homeScore = matchResponse.goals.home ?: 0,
-                awayScore = matchResponse.goals.away ?: 0,
-                status = mapStatusToMatchStatus(matchResponse.status),
-                minute = matchResponse.status.elapsed,
-                league = mapLeague(matchResponse),
-                dateTime = parseDateTime(matchResponse.date),
-                events = emptyList(), // API не предоставляет события матча в бесплатной версии
-                isFavorite = false // Будет управляться локально
+                homeTeam = Team(
+                    id = homeId.toString(),
+                    name = homeName,
+                    shortName = extractShortName(homeName),
+                    logoUrl = matchResponse.homeTeamLogo
+                ),
+                awayTeam = Team(
+                    id = awayId.toString(),
+                    name = awayName,
+                    shortName = extractShortName(awayName),
+                    logoUrl = matchResponse.awayTeamLogo
+                ),
+                homeScore = homeScore ?: 0,
+                awayScore = awayScore ?: 0,
+                status = mapStatusToMatchStatus(status, statusType),
+                minute = parseMinute(matchResponse.time),
+                league = League(
+                    id = leagueId.toString(),
+                    name = leagueName,
+                    country = matchResponse.className ?: "",
+                    logoUrl = matchResponse.leagueLogo
+                ),
+                dateTime = parseDateTime(startTime),
+                events = emptyList(),
+                isFavorite = false
             )
         } catch (e: Exception) {
             Log.e("LiveKick", "Ошибка маппинга матча ${matchResponse.id}: ${e.message}", e)
-            throw e
+            return null
         }
     }
     
-    private fun mapHomeTeam(matchResponse: MatchResponse): Team {
-        return Team(
-            id = matchResponse.teams.home.id.toString(),
-            name = matchResponse.teams.home.name,
-            shortName = extractShortName(matchResponse.teams.home.name),
-            logoUrl = matchResponse.teams.home.logo
-        )
-    }
-    
-    private fun mapAwayTeam(matchResponse: MatchResponse): Team {
-        return Team(
-            id = matchResponse.teams.away.id.toString(),
-            name = matchResponse.teams.away.name,
-            shortName = extractShortName(matchResponse.teams.away.name),
-            logoUrl = matchResponse.teams.away.logo
-        )
-    }
-    
-    private fun mapLeague(matchResponse: MatchResponse): League {
-        return League(
-            id = matchResponse.league.id.toString(),
-            name = matchResponse.league.name,
-            country = matchResponse.country.name,
-            logoUrl = matchResponse.league.logo
-        )
-    }
-    
-    private fun mapStatusToMatchStatus(status: Status): MatchStatus {
+    private fun mapStatusToMatchStatus(status: Status?, statusType: String?): MatchStatus {
+        // Пример: status.type = "live", statusType = "live", status.reason = "1st half"
         return when {
-            status.short == "LIVE" || status.short == "HT" || status.short == "2H" -> MatchStatus.LIVE
-            status.short == "FT" || status.short == "AET" || status.short == "PEN" -> MatchStatus.FINISHED
-            status.short == "PST" -> MatchStatus.POSTPONED
-            status.short == "CANC" -> MatchStatus.CANCELLED
+            statusType?.equals("live", ignoreCase = true) == true || status?.type?.equals("live", ignoreCase = true) == true -> MatchStatus.LIVE
+            statusType?.equals("finished", ignoreCase = true) == true || status?.type?.equals("finished", ignoreCase = true) == true -> MatchStatus.FINISHED
+            statusType?.equals("postponed", ignoreCase = true) == true || status?.type?.equals("postponed", ignoreCase = true) == true -> MatchStatus.POSTPONED
+            statusType?.equals("cancelled", ignoreCase = true) == true || status?.type?.equals("cancelled", ignoreCase = true) == true -> MatchStatus.CANCELLED
             else -> MatchStatus.SCHEDULED
         }
+    }
+    
+    private fun parseMinute(time: String?): Int? {
+        // Пример: "69'", "HT", "01'", "45+1'"
+        if (time == null) return null
+        val regex = Regex("(\\d+)")
+        val match = regex.find(time)
+        return match?.value?.toIntOrNull()
     }
     
     private fun extractShortName(fullName: String): String {
@@ -113,6 +119,6 @@ object ApiFootballMapper {
     }
     
     fun mapMatchResponseListToMatches(matches: List<MatchResponse>): List<Match> {
-        return matches.map { mapMatchResponseToMatch(it) }
+        return matches.mapNotNull { mapMatchResponseToMatch(it) }
     }
 } 

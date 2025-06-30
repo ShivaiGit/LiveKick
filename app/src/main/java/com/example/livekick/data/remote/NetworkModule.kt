@@ -1,5 +1,6 @@
 package com.example.livekick.data.remote
 
+import android.util.Log
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -18,12 +19,10 @@ object NetworkModule {
         })
         .addInterceptor { chain ->
             val original = chain.request()
-            val url = original.url.newBuilder()
-                .addQueryParameter("api_token", API_KEY)
-                .build()
             val request = original.newBuilder()
-                .url(url)
+                .addHeader("Authorization", "Bearer $API_KEY")
                 .build()
+            Log.d("LiveKick", "API запрос с Authorization: ${request.url}")
             chain.proceed(request)
         }
         .connectTimeout(30, TimeUnit.SECONDS)

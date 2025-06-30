@@ -8,30 +8,52 @@ typealias ApiFootballResponse = List<MatchResponse>
 data class MatchResponse(
     @SerializedName("id")
     val id: Int,
-    @SerializedName("referee")
-    val referee: String?,
-    @SerializedName("timezone")
-    val timezone: String,
-    @SerializedName("date")
-    val date: String,
-    @SerializedName("timestamp")
-    val timestamp: Int,
-    @SerializedName("periods")
-    val periods: Periods?,
-    @SerializedName("venue")
-    val venue: Venue?,
+    @SerializedName("name")
+    val name: String?,
+    @SerializedName("tournament_id")
+    val tournamentId: Int?,
+    @SerializedName("tournament_name")
+    val tournamentName: String?,
+    @SerializedName("season_id")
+    val seasonId: Int?,
+    @SerializedName("season_name")
+    val seasonName: String?,
     @SerializedName("status")
-    val status: Status,
-    @SerializedName("league")
-    val league: LeagueResponse,
-    @SerializedName("country")
-    val country: CountryResponse,
-    @SerializedName("teams")
-    val teams: Teams,
-    @SerializedName("goals")
-    val goals: Goals,
-    @SerializedName("score")
-    val score: Score
+    val status: Status?,
+    @SerializedName("status_type")
+    val statusType: String?,
+    @SerializedName("time")
+    val time: String?,
+    @SerializedName("home_team_id")
+    val homeTeamId: Int?,
+    @SerializedName("home_team_name")
+    val homeTeamName: String?,
+    @SerializedName("home_team_hash_image")
+    val homeTeamLogo: String?,
+    @SerializedName("home_team_score")
+    val homeTeamScore: ScoreValue?,
+    @SerializedName("away_team_id")
+    val awayTeamId: Int?,
+    @SerializedName("away_team_name")
+    val awayTeamName: String?,
+    @SerializedName("away_team_hash_image")
+    val awayTeamLogo: String?,
+    @SerializedName("away_team_score")
+    val awayTeamScore: ScoreValue?,
+    @SerializedName("start_time")
+    val startTime: String?,
+    @SerializedName("league_id")
+    val leagueId: Int?,
+    @SerializedName("league_name")
+    val leagueName: String?,
+    @SerializedName("league_hash_image")
+    val leagueLogo: String?,
+    @SerializedName("class_id")
+    val classId: Int?,
+    @SerializedName("class_name")
+    val className: String?,
+    @SerializedName("class_hash_image")
+    val classLogo: String?
 )
 
 data class Periods(
@@ -51,12 +73,10 @@ data class Venue(
 )
 
 data class Status(
-    @SerializedName("long")
-    val long: String,
-    @SerializedName("short")
-    val short: String,
-    @SerializedName("elapsed")
-    val elapsed: Int?
+    @SerializedName("type")
+    val type: String?,
+    @SerializedName("reason")
+    val reason: String?
 )
 
 data class LeagueResponse(
@@ -124,4 +144,43 @@ data class ScoreDetail(
     val home: Int?,
     @SerializedName("away")
     val away: Int?
+)
+
+data class ScoreValue(
+    @SerializedName("current")
+    val current: Int?,
+    @SerializedName("display")
+    val display: Int?,
+    @SerializedName("period_1")
+    val period1: Int?,
+    @SerializedName("period_2")
+    val period2: Int?,
+    @SerializedName("default_time")
+    val defaultTime: Int?
+)
+
+data class MatchStatisticsResponse(
+    @SerializedName("team_id") val teamId: Int?,
+    @SerializedName("team_name") val teamName: String?,
+    @SerializedName("shots_on_target") val shotsOnTarget: Int?,
+    @SerializedName("shots_off_target") val shotsOffTarget: Int?,
+    @SerializedName("possession") val possession: Int?,
+    @SerializedName("passes") val passes: Int?,
+    @SerializedName("fouls") val fouls: Int?,
+    @SerializedName("yellow_cards") val yellowCards: Int?,
+    @SerializedName("red_cards") val redCards: Int?,
+    @SerializedName("corners") val corners: Int?,
+    @SerializedName("offsides") val offsides: Int?,
+    @SerializedName("saves") val saves: Int?
+)
+
+data class MatchEventResponse(
+    @SerializedName("id") val id: Int?,
+    @SerializedName("type") val type: String?, // goal, yellow_card, red_card, substitution, etc.
+    @SerializedName("minute") val minute: Int?,
+    @SerializedName("team_id") val teamId: Int?,
+    @SerializedName("team_name") val teamName: String?,
+    @SerializedName("player_name") val playerName: String?,
+    @SerializedName("assist_name") val assistName: String?,
+    @SerializedName("description") val description: String?
 ) 

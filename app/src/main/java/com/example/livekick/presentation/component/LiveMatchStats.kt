@@ -133,27 +133,12 @@ fun LiveMatchStats(
 
 @Composable
 private fun LiveIndicator() {
-    var isVisible by remember { mutableStateOf(true) }
-    
-    LaunchedEffect(Unit) {
-        while (true) {
-            delay(1000)
-            isVisible = !isVisible
-        }
-    }
-    
-    AnimatedVisibility(
-        visible = isVisible,
-        enter = fadeIn(),
-        exit = fadeOut()
-    ) {
-        Box(
-            modifier = Modifier
-                .size(8.dp)
-                .clip(RoundedCornerShape(4.dp))
-                .background(MaterialTheme.colorScheme.error)
-        )
-    }
+    Box(
+        modifier = Modifier
+            .size(8.dp)
+            .clip(RoundedCornerShape(4.dp))
+            .background(MaterialTheme.colorScheme.error)
+    )
 }
 
 @Composable

@@ -1,42 +1,76 @@
 package com.example.livekick.data.remote
 
 import com.example.livekick.data.remote.dto.ApiFootballResponse
+import com.example.livekick.data.remote.dto.MatchStatisticsResponse
+import com.example.livekick.data.remote.dto.MatchEventResponse
 import retrofit2.http.GET
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface ApiFootballService {
     
     // Live матчи
-    @GET("api/v1/lives")
-    suspend fun getLiveMatches(): ApiFootballResponse
+    @GET("matches-live")
+    suspend fun getLiveMatches(
+        @Query("offset") offset: Int = 0,
+        @Query("limit") limit: Int = 50,
+        @Query("lang") lang: String = "en"
+    ): ApiFootballResponse
     
     // Матчи по дате
-    @GET("api/v1/fixtures")
+    @GET("matches-by-date")
     suspend fun getMatchesByDate(
-        @Query("date") date: String
+        @Query("date") date: String, // формат YYYY-MM-DD
+        @Query("offset") offset: Int = 0,
+        @Query("limit") limit: Int = 50,
+        @Query("lang") lang: String = "en"
     ): ApiFootballResponse
     
     // Матч по ID
-    @GET("api/v1/fixtures/{id}")
+    @GET("matches")
     suspend fun getMatchById(
-        @Query("id") matchId: String
+        @Query("id") matchId: String,
+        @Query("lang") lang: String = "en"
     ): ApiFootballResponse
     
     // Матчи по лиге
-    @GET("api/v1/fixtures")
+    @GET("matches")
     suspend fun getMatchesByLeague(
-        @Query("league_id") leagueId: String
+        @Query("league_id") leagueId: String,
+        @Query("offset") offset: Int = 0,
+        @Query("limit") limit: Int = 50,
+        @Query("lang") lang: String = "en"
     ): ApiFootballResponse
     
     // Лиги
-    @GET("api/v1/leagues")
-    suspend fun getLeagues(): ApiFootballResponse
+    @GET("leagues")
+    suspend fun getLeagues(
+        @Query("offset") offset: Int = 0,
+        @Query("limit") limit: Int = 50,
+        @Query("lang") lang: String = "en"
+    ): ApiFootballResponse
     
     // Страны
-    @GET("api/v1/countries")
-    suspend fun getCountries(): ApiFootballResponse
+    @GET("countries")
+    suspend fun getCountries(
+        @Query("offset") offset: Int = 0,
+        @Query("limit") limit: Int = 50,
+        @Query("lang") lang: String = "en"
+    ): ApiFootballResponse
     
     // Тестовый эндпоинт для проверки API
-    @GET("api/v1/countries")
+    @GET("leagues")
     suspend fun testApi(): ApiFootballResponse
+
+    @GET("match-statistics")
+    suspend fun getMatchStatistics(
+        @Query("match_id") matchId: String,
+        @Query("lang") lang: String = "en"
+    ): List<MatchStatisticsResponse>
+
+    @GET("match-events")
+    suspend fun getMatchEvents(
+        @Query("match_id") matchId: String,
+        @Query("lang") lang: String = "en"
+    ): List<MatchEventResponse>
 } 

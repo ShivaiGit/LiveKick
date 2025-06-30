@@ -25,6 +25,8 @@ import com.example.livekick.presentation.component.MatchProgressBar
 import com.example.livekick.presentation.component.AdvancedMatchStats
 import com.example.livekick.presentation.viewmodel.MatchDetailViewModel
 import com.example.livekick.presentation.viewmodel.MatchDetailViewModelFactory
+import com.example.livekick.data.remote.dto.MatchStatisticsResponse
+import com.example.livekick.data.remote.dto.MatchEventResponse
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -123,52 +125,37 @@ fun MatchDetailScreen(
             }
             
             else -> {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    item {
-                        // Карточка матча
-                        MatchHeaderCard(match = uiState.match!!)
+                Box(modifier = Modifier.fillMaxSize()) {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
+                        contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, 80.dp), // отступ снизу под бар
+                        verticalArrangement = Arrangement.spacedBy(20.dp)
+                    ) {
+                        item { MatchHeaderCard(match = uiState.match!!) }
+                        item { Divider(thickness = 1.5.dp) }
+                        item { MatchProgressBar(match = uiState.match!!) }
+                        item { Divider(thickness = 1.5.dp) }
+                        item { LiveMatchStats(match = uiState.match!!) }
+                        item { Divider(thickness = 1.5.dp) }
+                        item { if (uiState.statistics.isNotEmpty()) MatchStatisticsBlock(statistics = uiState.statistics) }
+                        item { Divider(thickness = 1.5.dp) }
+                        item { if (uiState.events.isNotEmpty()) MatchEventsBlock(events = uiState.events) }
+                        item { Divider(thickness = 1.5.dp) }
+                        item { if (uiState.events.isNotEmpty()) GoalScorersBlock(events = uiState.events) }
+                        item { Divider(thickness = 1.5.dp) }
+                        item { MatchStatisticsCard(match = uiState.match!!) }
+                        item { Divider(thickness = 1.5.dp) }
+                        item { LeagueInfoCard(match = uiState.match!!) }
                     }
-                    
-                    item {
-                        // Прогресс матча для LIVE матчей
-                        MatchProgressBar(match = uiState.match!!)
-                    }
-                    
-                    item {
-                        // LIVE статистика для живых матчей
-                        LiveMatchStats(match = uiState.match!!)
-                    }
-                    
-                    item {
-                        // Статистика матча
-                        MatchStatisticsCard(match = uiState.match!!)
-                    }
-                    
-                    item {
-                        // Расширенная статистика
-                        AdvancedMatchStats(
-                            match = uiState.match!!,
-                            statistics = null // Пока используем null, позже добавим реальные данные
-                        )
-                    }
-                    
-                    item {
-                        // События матча
-                        if (uiState.match!!.events.isNotEmpty()) {
-                            MatchEventsCard(events = uiState.match!!.events)
-                        }
-                    }
-                    
-                    item {
-                        // Информация о лиге
-                        LeagueInfoCard(match = uiState.match!!)
-                    }
+                    MatchDetailBottomBar(
+                        onRefresh = { viewModel.refresh() },
+                        onSettings = { /* TODO: Навигация к настройкам */ },
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .fillMaxWidth()
+                    )
                 }
             }
         }
@@ -434,96 +421,69 @@ fun StatisticItem(
 }
 
 @Composable
-fun MatchEventsCard(events: List<MatchEvent>) {
+fun MatchStatisticsBlock(statistics: List<MatchStatisticsResponse>) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Text(
-                text = "События матча",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
-            
-            Spacer(modifier = Modifier.height(12.dp))
-            
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(events) { event ->
-                    EventItem(event = event)
-                }
+        Column(Modifier.padding(16.dp)) {
+            Text("Статистика", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            Spacer(Modifier.height(8.dp))
+            statistics.forEach { stat ->
+                Text("${stat.teamName}: удары в створ: ${stat.shotsOnTarget ?: 0}, владение: ${stat.possession ?: 0}%")
             }
         }
     }
 }
 
 @Composable
-fun EventItem(event: MatchEvent) {
-    Row(
+fun MatchEventsBlock(events: List<MatchEventResponse>) {
+    Card(
         modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
-        // Иконка события
-        EventIcon(eventType = event.type)
-        
-        // Время
-        Text(
-            text = "${event.minute}'",
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.primary
-        )
-        
-        // Описание
-        Column(
-            modifier = Modifier.weight(1f)
-        ) {
-            Text(
-                text = event.description ?: getEventDescription(event),
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium
-            )
-            if (event.player != null) {
-                Text(
-                    text = event.player,
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+        Column(Modifier.padding(16.dp)) {
+            Text("События матча", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            Spacer(Modifier.height(8.dp))
+            events.forEach { event ->
+                Text("${event.minute ?: "-"}' ${event.type}: ${event.playerName ?: ""} (${event.teamName ?: ""})")
             }
         }
-        
-        // Команда
-        Text(
-            text = event.team.shortName ?: event.team.name,
-            fontSize = 12.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
     }
 }
 
 @Composable
-fun EventIcon(eventType: EventType) {
-    val (icon, color) = when (eventType) {
-        EventType.GOAL -> Pair(Icons.Default.Star, MaterialTheme.colorScheme.primary)
-        EventType.YELLOW_CARD -> Pair(Icons.Default.Warning, MaterialTheme.colorScheme.tertiary)
-        EventType.RED_CARD -> Pair(Icons.Default.Warning, MaterialTheme.colorScheme.error)
-        EventType.SUBSTITUTION -> Pair(Icons.Default.Refresh, MaterialTheme.colorScheme.secondary)
-        EventType.CORNER -> Pair(Icons.Default.Info, MaterialTheme.colorScheme.outline)
-        EventType.FOUL -> Pair(Icons.Default.Warning, MaterialTheme.colorScheme.tertiary)
+fun GoalScorersBlock(events: List<MatchEventResponse>) {
+    val goals = events.filter { it.type?.equals("goal", ignoreCase = true) == true }
+    if (goals.isEmpty()) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        ) {
+            Column(Modifier.padding(16.dp)) {
+                Text("Авторы голов", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Spacer(Modifier.height(8.dp))
+                Text("Нет информации о голах")
+            }
+        }
+        return
     }
-    
-    Icon(
-        imageVector = icon,
-        contentDescription = null,
-        modifier = Modifier.size(20.dp),
-        tint = color
-    )
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+        Column(Modifier.padding(16.dp)) {
+            Text("Авторы голов", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            Spacer(Modifier.height(8.dp))
+            goals.forEach { goal ->
+                Text("${goal.minute ?: "-"}' ${goal.playerName ?: "Неизвестно"} (${goal.teamName ?: ""})")
+            }
+        }
+    }
 }
 
 @Composable
@@ -595,4 +555,41 @@ private fun getEventDescription(event: MatchEvent): String {
 private fun formatMatchDateTime(dateTime: LocalDateTime): String {
     val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")
     return dateTime.format(formatter)
+}
+
+@Composable
+fun MatchDetailBottomBar(
+    onRefresh: () -> Unit,
+    onSettings: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        tonalElevation = 3.dp,
+        shadowElevation = 8.dp,
+        color = MaterialTheme.colorScheme.surface,
+        modifier = modifier
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onRefresh) {
+                Icon(
+                    imageVector = Icons.Default.Refresh,
+                    contentDescription = "Обновить",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+            IconButton(onClick = onSettings) {
+                Icon(
+                    imageVector = Icons.Default.Settings,
+                    contentDescription = "Настройки",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+    }
 } 

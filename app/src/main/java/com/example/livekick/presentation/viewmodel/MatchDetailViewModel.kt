@@ -7,6 +7,8 @@ import com.example.livekick.data.repository.MatchRepositoryImpl
 import com.example.livekick.domain.model.Match
 import com.example.livekick.domain.usecase.GetMatchByIdUseCase
 import com.example.livekick.domain.usecase.ToggleFavoriteMatchUseCase
+import com.example.livekick.data.remote.dto.MatchStatisticsResponse
+import com.example.livekick.data.remote.dto.MatchEventResponse
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,7 +16,8 @@ import kotlinx.coroutines.launch
 
 class MatchDetailViewModel(
     private val getMatchByIdUseCase: GetMatchByIdUseCase,
-    private val toggleFavoriteMatchUseCase: ToggleFavoriteMatchUseCase
+    private val toggleFavoriteMatchUseCase: ToggleFavoriteMatchUseCase,
+    private val matchRepository: MatchRepositoryImpl
 ) : ViewModel() {
     
     private val _uiState = MutableStateFlow(MatchDetailUiState())
@@ -35,8 +38,12 @@ class MatchDetailViewModel(
             
             try {
                 getMatchByIdUseCase(matchId).collect { match ->
+                    val statistics = matchRepository.getMatchStatistics(matchId)
+                    val events = matchRepository.getMatchEvents(matchId)
                     _uiState.value = _uiState.value.copy(
                         match = match,
+                        statistics = statistics,
+                        events = events,
                         isLoading = false,
                         error = null
                     )
@@ -73,6 +80,8 @@ class MatchDetailViewModel(
 
 data class MatchDetailUiState(
     val match: Match? = null,
+    val statistics: List<MatchStatisticsResponse> = emptyList(),
+    val events: List<MatchEventResponse> = emptyList(),
     val isLoading: Boolean = false,
     val error: String? = null
 )
@@ -87,7 +96,7 @@ class MatchDetailViewModelFactory(
             val toggleFavoriteMatchUseCase = ToggleFavoriteMatchUseCase(matchRepository)
             
             @Suppress("UNCHECKED_CAST")
-            return MatchDetailViewModel(getMatchByIdUseCase, toggleFavoriteMatchUseCase) as T
+            return MatchDetailViewModel(getMatchByIdUseCase, toggleFavoriteMatchUseCase, matchRepository) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
