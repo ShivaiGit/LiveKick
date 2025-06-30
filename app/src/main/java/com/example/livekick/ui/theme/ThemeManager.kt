@@ -31,6 +31,10 @@ class ThemeManager {
             ThemeMode.SYSTEM -> isSystemInDarkTheme
         }
     }
+
+    fun setThemeMode(mode: ThemeMode) {
+        themeMode = mode
+    }
 }
 
 val LocalThemeManager = staticCompositionLocalOf { ThemeManager() }

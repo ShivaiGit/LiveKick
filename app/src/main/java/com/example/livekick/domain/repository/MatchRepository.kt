@@ -10,4 +10,5 @@ interface MatchRepository {
     fun getFavoriteMatches(): Flow<List<Match>>
     suspend fun toggleFavorite(matchId: String)
     suspend fun refreshMatches()
+    suspend fun clearAllMatches()
 } 

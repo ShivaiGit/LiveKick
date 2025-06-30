@@ -81,7 +81,12 @@ class MatchRepositoryImpl(
         try {
             val response = apiService.getLiveMatches(offset = 0, limit = 50, lang = "en")
             val matches = ApiFootballMapper.mapMatchResponseListToMatches(response)
-            emit(matches)
+            val favoriteIds = localRepository.getFavoriteMatchIds()
+            val merged = matches.map { m ->
+                if (favoriteIds.contains(m.id)) m.copy(isFavorite = true) else m
+            }
+            localRepository.saveMatches(merged)
+            emit(merged)
         } catch (e: Exception) {
             Log.e("LiveKick", "Ошибка при получении live матчей: ", e)
             emit(emptyList())
@@ -101,12 +106,12 @@ class MatchRepositoryImpl(
             } else {
                 emptyList()
             }
-            
-            val matchesWithFavorites = matches.map { match ->
-                match.copy(isFavorite = false)
+            val favoriteIds = localRepository.getFavoriteMatchIds()
+            val merged = matches.map { m ->
+                if (favoriteIds.contains(m.id)) m.copy(isFavorite = true) else m
             }
-            
-            emit(matchesWithFavorites)
+            localRepository.saveMatches(merged)
+            emit(merged)
         } catch (e: Exception) {
             Log.e("LiveKick", "Ошибка получения матчей по лиге: ${e.message}", e)
             emit(emptyList())
@@ -124,7 +129,8 @@ class MatchRepositoryImpl(
             } else {
                 null
             }
-            val matchWithFavorite = match?.copy(isFavorite = false)
+            val favoriteIds = localRepository.getFavoriteMatchIds()
+            val matchWithFavorite = match?.copy(isFavorite = favoriteIds.contains(match.id))
             emit(matchWithFavorite)
         } catch (e: Exception) {
             Log.e("LiveKick", "Ошибка получения матча по ID: ${e.message}", e)
@@ -156,6 +162,10 @@ class MatchRepositoryImpl(
         // Очищаем старые матчи
         localRepository.clearOldMatches()
         delay(1000)
+    }
+
+    override suspend fun clearAllMatches() {
+        localRepository.clearAllMatches()
     }
     
     // Заглушечные данные на случай ошибки API

@@ -17,6 +17,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.livekick.presentation.viewmodel.NotificationSettingsViewModel
 import com.example.livekick.presentation.viewmodel.NotificationSettingsViewModelFactory
+import com.example.livekick.ui.theme.LocalThemeManager
+import com.example.livekick.ui.theme.ThemeMode
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -24,16 +28,20 @@ fun NotificationSettingsScreen(
     onNavigateBack: () -> Unit,
     viewModel: NotificationSettingsViewModel = viewModel(
         factory = NotificationSettingsViewModelFactory(LocalContext.current)
-    )
+    ),
+    matchRepository: com.example.livekick.data.repository.MatchRepositoryImpl? = null // для очистки кэша
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val themeManager = LocalThemeManager.current
+    val scope = rememberCoroutineScope()
+    var showClearDialog by remember { mutableStateOf(false) }
     
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        text = "Настройки уведомлений",
+                        text = "Настройки",
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold
                     )
@@ -56,6 +64,14 @@ fun NotificationSettingsScreen(
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
+            // Секция темы
+            NotificationSection(
+                title = "Тема приложения",
+                icon = Icons.Default.Palette
+            ) {
+                ThemeSelector(themeManager)
+            }
+            Spacer(modifier = Modifier.height(24.dp))
             // Общие настройки уведомлений
             NotificationSection(
                 title = "Общие уведомления",
@@ -144,6 +160,43 @@ fun NotificationSettingsScreen(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Тест уведомления")
+            }
+            
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            // Кнопка очистки кэша
+            Button(
+                onClick = { showClearDialog = true },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Очистить кэш и избранное")
+            }
+            if (showClearDialog) {
+                AlertDialog(
+                    onDismissRequest = { showClearDialog = false },
+                    title = { Text("Очистить все данные?") },
+                    text = { Text("Это удалит все матчи и избранное из памяти устройства. Продолжить?") },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            showClearDialog = false
+                            matchRepository?.let {
+                                scope.launch {
+                                    it.clearAllMatches()
+                                }
+                            }
+                        }) { Text("Да") }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showClearDialog = false }) { Text("Отмена") }
+                    }
+                )
             }
             
             Spacer(modifier = Modifier.height(16.dp))
@@ -244,5 +297,33 @@ private fun SwitchPreference(
             checked = checked,
             onCheckedChange = onCheckedChange
         )
+    }
+}
+
+@Composable
+private fun ThemeSelector(themeManager: com.example.livekick.ui.theme.ThemeManager) {
+    val current = themeManager.themeMode
+    Column {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            RadioButton(
+                selected = current == ThemeMode.LIGHT,
+                onClick = { themeManager.setThemeMode(ThemeMode.LIGHT) }
+            )
+            Text("Светлая", modifier = Modifier.padding(start = 4.dp))
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            RadioButton(
+                selected = current == ThemeMode.DARK,
+                onClick = { themeManager.setThemeMode(ThemeMode.DARK) }
+            )
+            Text("Тёмная", modifier = Modifier.padding(start = 4.dp))
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            RadioButton(
+                selected = current == ThemeMode.SYSTEM,
+                onClick = { themeManager.setThemeMode(ThemeMode.SYSTEM) }
+            )
+            Text("Системная", modifier = Modifier.padding(start = 4.dp))
+        }
     }
 } 
