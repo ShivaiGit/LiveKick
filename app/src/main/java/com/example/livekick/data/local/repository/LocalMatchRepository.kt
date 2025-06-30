@@ -47,4 +47,8 @@ class LocalMatchRepository(private val database: AppDatabase) {
     suspend fun clearAllMatches() {
         matchDao.clearAllMatches()
     }
+    
+    suspend fun getFavoriteMatchIds(): List<String> {
+        return database.matchDao().getFavoriteMatchIds()
+    }
 } 

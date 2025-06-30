@@ -27,6 +27,7 @@ import com.example.livekick.presentation.viewmodel.FavoritesViewModel
 import com.example.livekick.presentation.viewmodel.FavoritesViewModelFactory
 import com.example.livekick.ui.theme.*
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.material3.HorizontalDivider
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -281,22 +282,17 @@ private fun FavoritesList(
                 modifier = Modifier.padding(bottom = 8.dp)
             )
         }
-        
         items(
             items = matches,
             key = { it.id }
         ) { match ->
-            AnimatedVisibility(
-                visible = true,
-                enter = expandVertically() + fadeIn()
-            ) {
-                MatchCard(
-                    match = match,
-                    onMatchClick = onMatchClick,
-                    onFavoriteClick = onToggleFavorite,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
+            MatchCard(
+                match = match,
+                onMatchClick = onMatchClick,
+                onFavoriteClick = onToggleFavorite,
+                modifier = Modifier.fillMaxWidth()
+            )
+            HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.surfaceVariant)
         }
     }
 } 

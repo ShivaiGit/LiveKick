@@ -29,6 +29,13 @@ import com.example.livekick.data.remote.dto.MatchStatisticsResponse
 import com.example.livekick.data.remote.dto.MatchEventResponse
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import androidx.compose.foundation.background
+import androidx.compose.ui.graphics.Color
+import androidx.compose.material.icons.filled.SportsSoccer
+import androidx.compose.material.icons.filled.SwapHoriz
+import androidx.compose.material.icons.filled.Flag
+import androidx.compose.material.icons.filled.Block
+import androidx.compose.material3.HorizontalDivider
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -134,19 +141,19 @@ fun MatchDetailScreen(
                         verticalArrangement = Arrangement.spacedBy(20.dp)
                     ) {
                         item { MatchHeaderCard(match = uiState.match!!) }
-                        item { Divider(thickness = 1.5.dp) }
+                        item { HorizontalDivider(thickness = 1.5.dp) }
                         item { MatchProgressBar(match = uiState.match!!) }
-                        item { Divider(thickness = 1.5.dp) }
+                        item { HorizontalDivider(thickness = 1.5.dp) }
                         item { LiveMatchStats(match = uiState.match!!) }
-                        item { Divider(thickness = 1.5.dp) }
+                        item { HorizontalDivider(thickness = 1.5.dp) }
                         item { if (uiState.statistics.isNotEmpty()) MatchStatisticsBlock(statistics = uiState.statistics) }
-                        item { Divider(thickness = 1.5.dp) }
+                        item { HorizontalDivider(thickness = 1.5.dp) }
                         item { if (uiState.events.isNotEmpty()) MatchEventsBlock(events = uiState.events) }
-                        item { Divider(thickness = 1.5.dp) }
+                        item { HorizontalDivider(thickness = 1.5.dp) }
                         item { if (uiState.events.isNotEmpty()) GoalScorersBlock(events = uiState.events) }
-                        item { Divider(thickness = 1.5.dp) }
+                        item { HorizontalDivider(thickness = 1.5.dp) }
                         item { MatchStatisticsCard(match = uiState.match!!) }
-                        item { Divider(thickness = 1.5.dp) }
+                        item { HorizontalDivider(thickness = 1.5.dp) }
                         item { LeagueInfoCard(match = uiState.match!!) }
                     }
                     MatchDetailBottomBar(

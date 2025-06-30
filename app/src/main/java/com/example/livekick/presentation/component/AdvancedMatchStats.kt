@@ -46,13 +46,13 @@ fun AdvancedMatchStats(
             if (statistics != null) {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     PossessionChart(statistics.possession)
-                    Divider(thickness = 1.dp)
+                    HorizontalDivider(thickness = 1.dp)
                     ShotAnalysis(statistics.shots)
-                    Divider(thickness = 1.dp)
+                    HorizontalDivider(thickness = 1.dp)
                     PassAnalysis(statistics.passes)
-                    Divider(thickness = 1.dp)
+                    HorizontalDivider(thickness = 1.dp)
                     CardAnalysis(statistics.cards)
-                    Divider(thickness = 1.dp)
+                    HorizontalDivider(thickness = 1.dp)
                     OtherStats(
                         corners = statistics.corners,
                         fouls = statistics.fouls,

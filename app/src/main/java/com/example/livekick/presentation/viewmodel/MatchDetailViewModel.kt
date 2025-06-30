@@ -59,12 +59,16 @@ class MatchDetailViewModel(
     
     fun toggleFavorite() {
         val matchId = currentMatchId ?: return
-        
         viewModelScope.launch {
             try {
                 toggleFavoriteMatchUseCase(matchId)
-                // Обновляем данные матча после изменения статуса
-                loadMatchDetails()
+                // Локально обновляем статус в uiState без перезагрузки данных
+                val current = _uiState.value.match
+                if (current != null) {
+                    _uiState.value = _uiState.value.copy(
+                        match = current.copy(isFavorite = !current.isFavorite)
+                    )
+                }
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     error = e.message ?: "Ошибка изменения статуса избранного"

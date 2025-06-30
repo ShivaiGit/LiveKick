@@ -1,15 +1,44 @@
+# Gradle
+.gradle/
+build/
+*/build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Local configuration
+local.properties
+*.env
+
+# IDEs
+.idea/
 *.iml
-.gradle
-/local.properties
+*.ipr
+*.iws
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# Android Studio
+.cxx/
+.externalNativeBuild/
+captures/
+.kotlin/
+
+# Misc
+*.log
+*.hprof
+
+# Exclude generated files
+*.apk
+*.ap_
+
+# Old specific exclusions (for compatibility)
 /.idea/caches
 /.idea/libraries
 /.idea/modules.xml
 /.idea/workspace.xml
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
-local.properties

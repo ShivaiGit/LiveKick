@@ -165,8 +165,11 @@ class HomeViewModel(
         viewModelScope.launch {
             try {
                 toggleFavoriteMatchUseCase(match.id)
-                // Обновляем список матчей после изменения избранного
-                loadMatches()
+                // Локально обновляем статус избранного в списке
+                allMatches = allMatches.map {
+                    if (it.id == match.id) it.copy(isFavorite = !it.isFavorite) else it
+                }
+                filterMatches()
             } catch (e: Exception) {
                 // Обработка ошибки
             }

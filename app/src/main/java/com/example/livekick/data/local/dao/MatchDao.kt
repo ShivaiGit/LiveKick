@@ -36,4 +36,7 @@ interface MatchDao {
     
     @Query("DELETE FROM matches")
     suspend fun clearAllMatches()
+    
+    @Query("SELECT id FROM matches WHERE isFavorite = 1")
+    suspend fun getFavoriteMatchIds(): List<String>
 } 
