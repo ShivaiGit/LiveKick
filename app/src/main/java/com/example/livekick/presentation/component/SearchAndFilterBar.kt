@@ -33,8 +33,8 @@ fun SearchAndFilterBar(
     onStatusFilterChange: (MatchStatus?) -> Unit,
     selectedLeague: String?,
     onLeagueFilterChange: (String?) -> Unit,
-    selectedDate: String?,
-    onDateFilterChange: (String?) -> Unit,
+    selectedDate: DateFilter?,
+    onDateFilterChange: (DateFilter?) -> Unit,
     availableLeagues: List<String>,
     modifier: Modifier = Modifier
 ) {
