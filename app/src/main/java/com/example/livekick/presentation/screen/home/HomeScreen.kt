@@ -164,7 +164,7 @@ fun HomeScreen(
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         LottieLoadingIndicator(
-                            modifier = Modifier.size(80.dp)
+                            modifier = Modifier.size(140.dp)
                         )
                         Text(
                             text = "Загрузка матчей...",
