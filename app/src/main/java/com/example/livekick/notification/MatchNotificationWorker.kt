@@ -52,6 +52,7 @@ class MatchNotificationWorker(
             
             return Result.success()
         } catch (e: Exception) {
+            android.util.Log.e("LiveKick", "Ошибка фоновой работы уведомлений: ${e.message}", e)
             return Result.retry()
         }
     }

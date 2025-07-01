@@ -15,6 +15,7 @@ import com.example.livekick.MainActivity
 import com.example.livekick.R
 import com.example.livekick.domain.model.Match
 import com.example.livekick.domain.model.MatchStatus
+import android.util.Log
 
 class LiveKickNotificationManager(private val context: Context) {
     
@@ -113,7 +114,7 @@ class LiveKickNotificationManager(private val context: Context) {
                 notification
             )
         } catch (e: SecurityException) {
-            // Разрешение не предоставлено
+            Log.e("LiveKick", "Нет разрешения на уведомления: ${e.message}", e)
         }
     }
     
@@ -151,7 +152,7 @@ class LiveKickNotificationManager(private val context: Context) {
                 notification
             )
         } catch (e: SecurityException) {
-            // Разрешение не предоставлено
+            Log.e("LiveKick", "Нет разрешения на уведомления: ${e.message}", e)
         }
     }
     
@@ -186,7 +187,7 @@ class LiveKickNotificationManager(private val context: Context) {
                 notification
             )
         } catch (e: SecurityException) {
-            // Разрешение не предоставлено
+            Log.e("LiveKick", "Нет разрешения на уведомления: ${e.message}", e)
         }
     }
     
@@ -196,7 +197,7 @@ class LiveKickNotificationManager(private val context: Context) {
             notificationManager.cancel(NOTIFICATION_ID_MATCH_START + matchId.hashCode())
             notificationManager.cancel(NOTIFICATION_ID_MATCH_EVENTS + matchId.hashCode())
         } catch (e: SecurityException) {
-            // Разрешение не предоставлено
+            Log.e("LiveKick", "Нет разрешения на отмену уведомлений: ${e.message}", e)
         }
     }
     
@@ -204,7 +205,7 @@ class LiveKickNotificationManager(private val context: Context) {
         try {
             NotificationManagerCompat.from(context).cancelAll()
         } catch (e: SecurityException) {
-            // Разрешение не предоставлено
+            Log.e("LiveKick", "Нет разрешения на отмену всех уведомлений: ${e.message}", e)
         }
     }
 } 
