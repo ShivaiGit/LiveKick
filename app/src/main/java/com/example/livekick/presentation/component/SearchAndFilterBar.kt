@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.example.livekick.domain.model.MatchStatus
+import com.example.livekick.presentation.viewmodel.DateFilter
 import com.example.livekick.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -127,14 +128,12 @@ fun SearchAndFilterBar(
                 // Фильтр по дате
                 FilterSection(
                     title = "Дата",
-                    selectedValue = selectedDate,
-                    onValueChange = onDateFilterChange,
-                    options = listOf(
-                        "today" to "Сегодня",
-                        "tomorrow" to "Завтра",
-                        "yesterday" to "Вчера",
-                        "this_week" to "На этой неделе"
-                    )
+                    selectedValue = selectedDate?.key,
+                    onValueChange = { key ->
+                        val filter = DateFilter.values().find { it.key == key }
+                        onDateFilterChange(filter)
+                    },
+                    options = DateFilter.values().map { it.key to it.displayName }
                 )
                 
                 // Фильтр по статусу

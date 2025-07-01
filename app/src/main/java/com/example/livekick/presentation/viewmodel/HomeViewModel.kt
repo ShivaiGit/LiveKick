@@ -18,6 +18,13 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
+enum class DateFilter(val key: String, val displayName: String) {
+    TODAY("today", "Сегодня"),
+    TOMORROW("tomorrow", "Завтра"),
+    YESTERDAY("yesterday", "Вчера"),
+    THIS_WEEK("this_week", "На этой неделе")
+}
+
 class HomeViewModel(
     private val getLiveMatchesUseCase: GetLiveMatchesUseCase,
     private val toggleFavoriteMatchUseCase: ToggleFavoriteMatchUseCase,
@@ -37,8 +44,8 @@ class HomeViewModel(
     private val _selectedLeague = MutableStateFlow<String?>(null)
     val selectedLeague: StateFlow<String?> = _selectedLeague.asStateFlow()
     
-    private val _selectedDate = MutableStateFlow<String?>(null)
-    val selectedDate: StateFlow<String?> = _selectedDate.asStateFlow()
+    private val _selectedDate = MutableStateFlow<DateFilter?>(null)
+    val selectedDate: StateFlow<DateFilter?> = _selectedDate.asStateFlow()
     
     private val _availableLeagues = MutableStateFlow<List<String>>(emptyList())
     val availableLeagues: StateFlow<List<String>> = _availableLeagues.asStateFlow()
@@ -108,25 +115,24 @@ class HomeViewModel(
         if (date != null) {
             val today = LocalDate.now()
             filteredMatches = when (date) {
-                "today" -> filteredMatches.filter { 
+                DateFilter.TODAY -> filteredMatches.filter {
                     val matchDate = it.dateTime.toLocalDate()
                     matchDate == today
                 }
-                "tomorrow" -> filteredMatches.filter { 
+                DateFilter.TOMORROW -> filteredMatches.filter {
                     val matchDate = it.dateTime.toLocalDate()
                     matchDate == today.plusDays(1)
                 }
-                "yesterday" -> filteredMatches.filter { 
+                DateFilter.YESTERDAY -> filteredMatches.filter {
                     val matchDate = it.dateTime.toLocalDate()
                     matchDate == today.minusDays(1)
                 }
-                "this_week" -> filteredMatches.filter { 
+                DateFilter.THIS_WEEK -> filteredMatches.filter {
                     val matchDate = it.dateTime.toLocalDate()
                     val weekStart = today.minusDays(today.dayOfWeek.value.toLong() - 1)
                     val weekEnd = weekStart.plusDays(6)
                     matchDate in weekStart..weekEnd
                 }
-                else -> filteredMatches
             }
         }
         
@@ -152,7 +158,7 @@ class HomeViewModel(
         filterMatches()
     }
     
-    fun onDateFilterChange(date: String?) {
+    fun onDateFilterChange(date: DateFilter?) {
         _selectedDate.value = date
         filterMatches()
     }
