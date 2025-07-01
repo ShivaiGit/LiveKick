@@ -6,6 +6,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.livekick.domain.model.*
 import com.example.livekick.presentation.viewmodel.HomeUiState
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -15,6 +16,12 @@ import java.time.LocalDateTime
 class HomeScreenTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<TestActivity>()
+
+    @Before
+    fun setUp() {
+        // Сбросить composable перед каждым тестом
+        TestActivity.composable = null
+    }
 
     @Test
     fun loadingIndicator_isDisplayed_whenLoading() {
