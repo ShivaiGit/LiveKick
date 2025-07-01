@@ -14,6 +14,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
+import com.airbnb.lottie.compose.*
 
 @Composable
 fun AnimatedLoadingIndicator(
@@ -178,4 +179,15 @@ fun AnimatedShimmerLoading(
                 )
         )
     }
+}
+
+@Composable
+fun LottieLoadingIndicator(modifier: Modifier = Modifier) {
+    val composition by rememberLottieComposition(LottieCompositionSpec.Asset("football_loader.json"))
+    val progress by animateLottieCompositionAsState(composition, iterations = LottieConstants.IterateForever)
+    LottieAnimation(
+        composition = composition,
+        progress = { progress },
+        modifier = modifier
+    )
 } 

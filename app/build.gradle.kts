@@ -95,6 +95,7 @@ dependencies {
     
     // Animations
     implementation(libs.lottie.compose)
+    implementation("com.airbnb.android:lottie-compose:6.4.0")
     
     // Dependency Injection
     // implementation(libs.hilt.android)

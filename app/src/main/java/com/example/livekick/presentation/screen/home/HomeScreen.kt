@@ -34,6 +34,7 @@ import com.example.livekick.presentation.component.MatchCard
 import com.example.livekick.presentation.component.SearchAndFilterBar
 import com.example.livekick.presentation.component.AnimatedMatchCard
 import com.example.livekick.presentation.component.AnimatedLoadingIndicator
+import com.example.livekick.presentation.component.LottieLoadingIndicator
 import com.example.livekick.presentation.viewmodel.HomeViewModel
 import com.example.livekick.presentation.viewmodel.HomeViewModelFactory
 import com.example.livekick.ui.theme.LocalThemeManager
@@ -162,8 +163,8 @@ fun HomeScreen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        AnimatedLoadingIndicator(
-                            modifier = Modifier.size(48.dp)
+                        LottieLoadingIndicator(
+                            modifier = Modifier.size(80.dp)
                         )
                         Text(
                             text = "Загрузка матчей...",
