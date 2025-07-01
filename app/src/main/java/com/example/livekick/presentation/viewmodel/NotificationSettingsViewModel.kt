@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.livekick.notification.LiveKickNotificationManager
 import com.example.livekick.notification.NotificationScheduler
-import com.example.livekick.data.local.repository.UserPreferencesDataStore
 import com.example.livekick.ui.theme.Language
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,7 +19,6 @@ class NotificationSettingsViewModel(
     
     private val notificationManager = LiveKickNotificationManager(context)
     private val notificationScheduler = NotificationScheduler(context)
-    private val userPrefs = UserPreferencesDataStore(context)
     
     private val _uiState = MutableStateFlow(NotificationSettingsUiState())
     val uiState: StateFlow<NotificationSettingsUiState> = _uiState.asStateFlow()
@@ -46,9 +44,9 @@ class NotificationSettingsViewModel(
     
     private fun observeLanguage() {
         viewModelScope.launch {
-            userPrefs.languageFlow.collect { lang ->
-                _uiState.value = _uiState.value.copy(language = lang)
-            }
+            // userPrefs.languageFlow.collect { lang ->
+            //     _uiState.value = _uiState.value.copy(language = lang)
+            // }
         }
     }
     
@@ -96,7 +94,7 @@ class NotificationSettingsViewModel(
     
     fun setLanguage(language: Language) {
         viewModelScope.launch {
-            userPrefs.setLanguage(language)
+            // userPrefs.setLanguage(language)
         }
     }
     

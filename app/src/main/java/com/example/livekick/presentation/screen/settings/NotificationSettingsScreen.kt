@@ -28,8 +28,7 @@ fun NotificationSettingsScreen(
     onNavigateBack: () -> Unit,
     viewModel: NotificationSettingsViewModel = viewModel(
         factory = NotificationSettingsViewModelFactory(LocalContext.current)
-    ),
-    matchRepository: com.example.livekick.data.repository.MatchRepositoryImpl? = null // для очистки кэша
+    )
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val themeManager = LocalThemeManager.current
@@ -197,11 +196,6 @@ fun NotificationSettingsScreen(
                     confirmButton = {
                         TextButton(onClick = {
                             showClearDialog = false
-                            matchRepository?.let {
-                                scope.launch {
-                                    it.clearAllMatches()
-                                }
-                            }
                         }) { Text("Да") }
                     },
                     dismissButton = {
