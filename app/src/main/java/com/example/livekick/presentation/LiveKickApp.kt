@@ -30,6 +30,10 @@ import androidx.compose.material3.Icon
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.Shadow
+import androidx.compose.ui.unit.Offset
 
 @Composable
 fun LiveKickApp(matchRepository: MatchRepositoryImpl) {
@@ -49,13 +53,24 @@ fun LiveKickApp(matchRepository: MatchRepositoryImpl) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 24.dp, bottom = 8.dp),
+                            .padding(top = 12.dp, bottom = 4.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = "LiveKick",
-                            style = MaterialTheme.typography.headlineLarge,
-                            color = MaterialTheme.colorScheme.primary
+                            style = MaterialTheme.typography.headlineMedium.copy(
+                                fontWeight = FontWeight.ExtraBold,
+                                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                                letterSpacing = 4.sp,
+                                shadow = Shadow(
+                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
+                                    offset = Offset(2f, 4f),
+                                    blurRadius = 6f
+                                )
+                            ),
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier
+                                .padding(horizontal = 8.dp)
                         )
                     }
                     // Контент с навигацией

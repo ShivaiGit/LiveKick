@@ -45,26 +45,30 @@ fun SearchAndFilterBar(
             .fillMaxWidth()
             .background(
                 MaterialTheme.colorScheme.surface,
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(8.dp)
             )
-            .padding(16.dp)
+            .padding(8.dp)
     ) {
         // Поисковая строка
         OutlinedTextField(
             value = searchQuery,
             onValueChange = onSearchQueryChange,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(40.dp),
             placeholder = {
                 Text(
-                    text = "Поиск по командам...",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    text = "Поиск...",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = MaterialTheme.typography.bodyMedium.fontSize
                 )
             },
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Search,
                     contentDescription = "Поиск",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(18.dp)
                 )
             },
             trailingIcon = {
@@ -73,7 +77,8 @@ fun SearchAndFilterBar(
                         Icon(
                             imageVector = Icons.Default.Clear,
                             contentDescription = "Очистить",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(18.dp)
                         )
                     }
                 }
@@ -86,104 +91,71 @@ fun SearchAndFilterBar(
                 focusedContainerColor = MaterialTheme.colorScheme.surface,
                 unfocusedContainerColor = MaterialTheme.colorScheme.surface
             ),
-            shape = RoundedCornerShape(12.dp)
+            shape = RoundedCornerShape(8.dp)
         )
-        
-        Spacer(modifier = Modifier.height(12.dp))
-        
-        // Кнопка фильтров
+        Spacer(modifier = Modifier.height(4.dp))
+        // Фильтры — компактная строка
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = "Фильтры",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            
-            IconButton(
-                onClick = { isExpanded = !isExpanded }
-            ) {
-                Icon(
-                    imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                    contentDescription = "Показать фильтры",
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            }
-        }
-        
-        // Расширенные фильтры
-        AnimatedVisibility(
-            visible = isExpanded,
-            enter = expandVertically() + fadeIn(),
-            exit = shrinkVertically() + fadeOut()
-        ) {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                // Фильтр по дате
-                FilterSection(
-                    title = "Дата",
-                    selectedValue = selectedDate?.key,
-                    onValueChange = { key ->
-                        val filter = DateFilter.values().find { it.key == key }
-                        onDateFilterChange(filter)
-                    },
-                    options = DateFilter.values().map { it.key to it.displayName }
-                )
-                
-                // Фильтр по статусу
-                FilterSection(
-                    title = "Статус матча",
-                    selectedValue = selectedStatus?.name,
-                    onValueChange = { value ->
-                        onStatusFilterChange(
-                            if (value == null) null else MatchStatus.valueOf(value)
-                        )
-                    },
-                    options = listOf(
-                        "LIVE" to "В прямом эфире",
-                        "SCHEDULED" to "Запланированные",
-                        "FINISHED" to "Завершенные"
+            // Дата
+            FilterChip(
+                selected = selectedDate != null,
+                onClick = { onDateFilterChange(if (selectedDate == null) DateFilter.TODAY else null) },
+                label = { Text(selectedDate?.displayName ?: "Дата") },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.DateRange,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
                     )
-                )
-                
-                // Фильтр по лиге
-                FilterSection(
-                    title = "Лига",
-                    selectedValue = selectedLeague,
-                    onValueChange = onLeagueFilterChange,
-                    options = availableLeagues.map { it to it }
-                )
-                
-                // Кнопка сброса фильтров
-                if (selectedStatus != null || selectedLeague != null || selectedDate != null || searchQuery.isNotEmpty()) {
-                    Button(
-                        onClick = {
-                            onSearchQueryChange("")
-                            onStatusFilterChange(null)
-                            onLeagueFilterChange(null)
-                            onDateFilterChange(null)
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.errorContainer,
-                            contentColor = MaterialTheme.colorScheme.onErrorContainer
-                        ),
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Clear,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Сбросить фильтры")
-                    }
+                },
+                shape = RoundedCornerShape(6.dp)
+            )
+            // Статус
+            FilterChip(
+                selected = selectedStatus != null,
+                onClick = { onStatusFilterChange(if (selectedStatus == null) MatchStatus.LIVE else null) },
+                label = { Text(selectedStatus?.let { status -> when(status) { MatchStatus.LIVE -> "Live"; MatchStatus.SCHEDULED -> "Будет"; MatchStatus.FINISHED -> "Завершён" } } ?: "Статус") },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Tune,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
+                },
+                shape = RoundedCornerShape(6.dp)
+            )
+            // Лига
+            FilterChip(
+                selected = selectedLeague != null,
+                onClick = { onLeagueFilterChange(if (selectedLeague == null && availableLeagues.isNotEmpty()) availableLeagues.first() else null) },
+                label = { Text(selectedLeague ?: "Лига") },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Flag,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
+                },
+                shape = RoundedCornerShape(6.dp)
+            )
+            // Сброс
+            if (selectedStatus != null || selectedLeague != null || selectedDate != null || searchQuery.isNotEmpty()) {
+                IconButton(onClick = {
+                    onSearchQueryChange("")
+                    onStatusFilterChange(null)
+                    onLeagueFilterChange(null)
+                    onDateFilterChange(null)
+                }, modifier = Modifier.size(28.dp)) {
+                    Icon(
+                        imageVector = Icons.Default.Clear,
+                        contentDescription = "Сбросить фильтры",
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.size(18.dp)
+                    )
                 }
             }
         }
