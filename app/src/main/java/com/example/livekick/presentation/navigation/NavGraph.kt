@@ -46,6 +46,40 @@ fun NavGraph(
         ) {
             HomeScreen(
                 matchRepository = matchRepository,
+                showLiveOnly = false,
+                onNavigateToMatch = { matchId ->
+                    navController.navigate("match/$matchId")
+                },
+                onNavigateToFavorites = {
+                    navController.navigate("favorites")
+                },
+                onNavigateToSettings = {
+                    navController.navigate("settings")
+                },
+                onNavigateToStatistics = {
+                    navController.navigate("statistics")
+                }
+            )
+        }
+        
+        composable(
+            route = "live",
+            enterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { -it },
+                    animationSpec = tween(300, easing = EaseOutCubic)
+                ) + fadeIn(animationSpec = tween(300))
+            },
+            exitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { it },
+                    animationSpec = tween(300, easing = EaseInCubic)
+                ) + fadeOut(animationSpec = tween(300))
+            }
+        ) {
+            HomeScreen(
+                matchRepository = matchRepository,
+                showLiveOnly = true,
                 onNavigateToMatch = { matchId ->
                     navController.navigate("match/$matchId")
                 },

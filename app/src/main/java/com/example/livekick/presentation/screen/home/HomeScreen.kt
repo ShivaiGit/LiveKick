@@ -44,6 +44,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 @Composable
 fun HomeScreen(
     matchRepository: MatchRepositoryImpl,
+    showLiveOnly: Boolean = false,
     viewModel: HomeViewModel = viewModel(
         factory = HomeViewModelFactory(matchRepository)
     ),
@@ -135,51 +136,35 @@ fun HomeScreen(
                 }
             }
             
-            uiState.matches.isEmpty() -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
+            else -> {
+                val matches = if (showLiveOnly) {
+                    uiState.matches.filter { it.status == MatchStatus.LIVE }
+                } else {
+                    uiState.matches
+                }
+                if (matches.isEmpty()) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Info,
-                            contentDescription = null,
-                            modifier = Modifier.size(64.dp),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
                         Text(
-                            text = "Нет активных матчей",
-                            style = MaterialTheme.typography.headlineSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = TextAlign.Center
-                        )
-                        Text(
-                            text = "Попробуйте изменить фильтры или обновить данные",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = TextAlign.Center
+                            text = if (showLiveOnly) "Нет live-матчей" else "Нет матчей",
+                            fontSize = 18.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                }
-            }
-            
-            else -> {
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(
-                        items = uiState.matches,
-                        key = { it.id }
-                    ) { match ->
-                        AnimatedMatchCard(
-                            match = match,
-                            onMatchClick = { onNavigateToMatch(match.id) },
-                            onFavoriteClick = { viewModel.onToggleFavorite(match) },
-                            isVisible = true
-                        )
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(matches) { match ->
+                            MatchCard(
+                                match = match,
+                                onClick = { onNavigateToMatch(match.id) },
+                                onToggleFavorite = { viewModel.toggleFavorite(match.id) }
+                            )
+                        }
                     }
                 }
             }
