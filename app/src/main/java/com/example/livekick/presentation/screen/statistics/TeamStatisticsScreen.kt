@@ -26,25 +26,7 @@ fun TeamStatisticsScreen(
     onNavigateBack: () -> Unit
 ) {
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "Статистика команд",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Назад"
-                        )
-                    }
-                }
-            )
-        }
+        // Удаляю topBar
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier

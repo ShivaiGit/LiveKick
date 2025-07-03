@@ -45,12 +45,7 @@ fun FavoritesScreen(
     val listState = rememberLazyListState()
     
     Scaffold(
-        topBar = {
-            FavoritesTopBar(
-                onBackClick = onNavigateBack,
-                onRefreshClick = { viewModel.refreshFavorites() }
-            )
-        }
+        // Удаляю topBar
     ) { paddingValues ->
         Box(
             modifier = modifier

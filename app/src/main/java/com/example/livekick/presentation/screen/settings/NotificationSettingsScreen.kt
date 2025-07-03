@@ -36,25 +36,7 @@ fun NotificationSettingsScreen(
     var showClearDialog by remember { mutableStateOf(false) }
     
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "Настройки",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Назад"
-                        )
-                    }
-                }
-            )
-        }
+        // Удаляю topBar
     ) { paddingValues ->
         Column(
             modifier = Modifier
