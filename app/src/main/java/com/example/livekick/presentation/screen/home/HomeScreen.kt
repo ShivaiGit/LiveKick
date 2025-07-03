@@ -159,10 +159,11 @@ fun HomeScreen(
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         items(matches) { match ->
-                            MatchCard(
+                            AnimatedMatchCard(
                                 match = match,
-                                onClick = { onNavigateToMatch(match.id) },
-                                onToggleFavorite = { viewModel.toggleFavorite(match.id) }
+                                onMatchClick = { onNavigateToMatch(match.id) },
+                                onFavoriteClick = { viewModel.toggleFavorite(match.id) },
+                                isVisible = true
                             )
                         }
                     }
