@@ -162,7 +162,7 @@ fun HomeScreen(
                             AnimatedMatchCard(
                                 match = match,
                                 onMatchClick = { onNavigateToMatch(match.id) },
-                                onFavoriteClick = { viewModel.toggleFavorite(match.id) },
+                                onFavoriteClick = { viewModel.onToggleFavorite(match) },
                                 isVisible = true
                             )
                         }
