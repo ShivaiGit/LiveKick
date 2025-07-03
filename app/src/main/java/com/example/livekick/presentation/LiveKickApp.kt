@@ -32,8 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.text.Shadow
-import androidx.compose.ui.unit.Offset
+import androidx.compose.ui.geometry.Offset
 
 @Composable
 fun LiveKickApp(matchRepository: MatchRepositoryImpl) {
@@ -61,12 +60,7 @@ fun LiveKickApp(matchRepository: MatchRepositoryImpl) {
                             style = MaterialTheme.typography.headlineMedium.copy(
                                 fontWeight = FontWeight.ExtraBold,
                                 fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
-                                letterSpacing = 4.sp,
-                                shadow = Shadow(
-                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
-                                    offset = Offset(2f, 4f),
-                                    blurRadius = 6f
-                                )
+                                letterSpacing = 4.sp
                             ),
                             color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier
