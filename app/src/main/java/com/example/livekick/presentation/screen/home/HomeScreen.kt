@@ -182,17 +182,52 @@ fun HomeScreen(
                             )
                         }
                     } else {
+                        // Группировка по лигам
+                        val matchesByLeague = matches.groupBy { it.league }
                         LazyColumn(
                             modifier = Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            items(matches) { match ->
-                                AnimatedMatchCard(
-                                    match = match,
-                                    onMatchClick = { onNavigateToMatch(match.id) },
-                                    onFavoriteClick = { viewModel.onToggleFavorite(match) },
-                                    isVisible = true
-                                )
+                            matchesByLeague.forEach { (league, leagueMatches) ->
+                                item(key = league.id) {
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(bottom = 4.dp)
+                                    ) {
+                                        Text(
+                                            text = league.name,
+                                            fontSize = 18.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)
+                                        )
+                                        Card(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            shape = RoundedCornerShape(12.dp),
+                                            colors = CardDefaults.cardColors(
+                                                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f)
+                                            ),
+                                            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                                        ) {
+                                            Column(
+                                                modifier = Modifier.padding(vertical = 4.dp)
+                                            ) {
+                                                leagueMatches.forEach { match ->
+                                                    AnimatedMatchCard(
+                                                        match = match,
+                                                        onMatchClick = { onNavigateToMatch(match.id) },
+                                                        onFavoriteClick = { viewModel.onToggleFavorite(match) },
+                                                        isVisible = true,
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .padding(horizontal = 4.dp, vertical = 2.dp)
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
