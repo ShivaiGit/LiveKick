@@ -135,9 +135,20 @@ class HomeViewModel(
                 }
             }
         }
-        
+
+        // --- Сортировка: топ-лиги первыми ---
+        val topLeagues = listOf(
+            "Premier League", "Лига чемпионов", "Champions League", "La Liga", "Ла Лига", "Serie A", "Серия А", "Bundesliga", "Бундеслига", "Ligue 1", "Лига 1", "Europa League", "Лига Европы"
+        )
+        val leaguePriority = topLeagues.withIndex().associate { it.value.lowercase() to it.index }
+        val (top, other) = filteredMatches.partition { m -> leaguePriority.containsKey(m.league.name.lowercase()) }
+        val sortedTop = top.sortedWith(compareBy({ leaguePriority[it.league.name.lowercase()] ?: Int.MAX_VALUE }, { it.dateTime }))
+        val sortedOther = other.sortedBy { it.dateTime }
+        val sortedMatches = sortedTop + sortedOther
+        // --- конец сортировки ---
+
         _uiState.value = _uiState.value.copy(
-            matches = filteredMatches,
+            matches = sortedMatches,
             isLoading = false,
             error = null
         )
