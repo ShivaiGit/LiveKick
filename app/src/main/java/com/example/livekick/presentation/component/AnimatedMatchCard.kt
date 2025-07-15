@@ -24,6 +24,11 @@ import com.example.livekick.domain.model.*
 import kotlinx.coroutines.delay
 import androidx.compose.foundation.border
 
+fun getDisplayTeamName(team: Team): String {
+    val sn = team.shortName.trim()
+    return if (sn.length <= 2 || sn.equals("FC", ignoreCase = true)) team.name else sn
+}
+
 @Composable
 fun AnimatedMatchCard(
     match: Match,
@@ -65,8 +70,15 @@ fun AnimatedMatchCard(
                 modifier = Modifier.width(40.dp),
                 maxLines = 1
             )
+            // Легкое разделение
+            Box(
+                modifier = Modifier
+                    .padding(horizontal = 6.dp)
+                    .width(1.dp)
+                    .height(32.dp)
+                    .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+            )
             // Две строки: команда и счет
-            Spacer(modifier = Modifier.width(8.dp))
             Column(
                 modifier = Modifier.weight(1f)
             ) {
@@ -75,7 +87,7 @@ fun AnimatedMatchCard(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = match.homeTeam.shortName,
+                        text = getDisplayTeamName(match.homeTeam),
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface,
@@ -97,7 +109,7 @@ fun AnimatedMatchCard(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = match.awayTeam.shortName,
+                        text = getDisplayTeamName(match.awayTeam),
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface,
@@ -115,6 +127,14 @@ fun AnimatedMatchCard(
                     )
                 }
             }
+            // Легкое разделение
+            Box(
+                modifier = Modifier
+                    .padding(horizontal = 6.dp)
+                    .width(1.dp)
+                    .height(32.dp)
+                    .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+            )
             // Кнопка избранного справа
             FavoriteButtonStatic(
                 isFavorite = match.isFavorite,
