@@ -35,7 +35,7 @@ fun AnimatedMatchCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .heightIn(min = 48.dp)
+            .heightIn(min = 44.dp)
             .clickable { onMatchClick() }
             .border(
                 width = 1.dp,
@@ -53,53 +53,69 @@ fun AnimatedMatchCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 6.dp),
+                .padding(horizontal = 8.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Время и статус
+            // Время матча слева
+            Text(
+                text = formatMatchTime(match.dateTime),
+                fontSize = 13.sp,
+                color = MaterialTheme.colorScheme.outline,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.width(40.dp),
+                maxLines = 1
+            )
+            // Две строки: команда и счет
+            Spacer(modifier = Modifier.width(8.dp))
             Column(
-                horizontalAlignment = Alignment.Start,
-                modifier = Modifier.widthIn(min = 44.dp)
+                modifier = Modifier.weight(1f)
             ) {
-                Text(
-                    text = formatMatchTime(match.dateTime),
-                    fontSize = 11.sp,
-                    color = MaterialTheme.colorScheme.outline,
-                    fontWeight = FontWeight.Medium,
-                    maxLines = 1
-                )
-                Spacer(modifier = Modifier.height(2.dp))
-                MatchStatusMaterial(status = match.status, minute = match.minute)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = match.homeTeam.shortName,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Text(
+                        text = match.homeScore.toString(),
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                        maxLines = 1,
+                        modifier = Modifier.widthIn(min = 24.dp),
+                        textAlign = TextAlign.End
+                    )
+                }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = match.awayTeam.shortName,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Text(
+                        text = match.awayScore.toString(),
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                        maxLines = 1,
+                        modifier = Modifier.widthIn(min = 24.dp),
+                        textAlign = TextAlign.End
+                    )
+                }
             }
-            // Команды и счет
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = match.homeTeam.shortName,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.weight(1f),
-                maxLines = 1,
-                textAlign = TextAlign.End
-            )
-            Spacer(modifier = Modifier.width(6.dp))
-            ScoreMaterial(
-                homeScore = match.homeScore,
-                awayScore = match.awayScore,
-                status = match.status
-            )
-            Spacer(modifier = Modifier.width(6.dp))
-            Text(
-                text = match.awayTeam.shortName,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.weight(1f),
-                maxLines = 1,
-                textAlign = TextAlign.Start
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            // Избранное
+            // Кнопка избранного справа
             FavoriteButtonStatic(
                 isFavorite = match.isFavorite,
                 onClick = onFavoriteClick,
