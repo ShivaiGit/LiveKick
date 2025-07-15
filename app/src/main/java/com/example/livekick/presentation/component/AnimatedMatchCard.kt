@@ -36,15 +36,15 @@ fun AnimatedMatchCard(
             .fillMaxWidth()
             .clickable { onMatchClick() },
         elevation = CardDefaults.cardElevation(
-            defaultElevation = 4.dp
+            defaultElevation = 2.dp // уменьшено
         ),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(12.dp), // уменьшено
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         )
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(8.dp) // было 16.dp
         ) {
             // Заголовок с лигой
             Row(
@@ -54,13 +54,14 @@ fun AnimatedMatchCard(
             ) {
                 Text(
                     text = match.league.name,
-                    fontSize = 12.sp,
+                    fontSize = 10.sp, // было 12.sp
                     color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Medium
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 1
                 )
                 MatchStatusStatic(status = match.status, minute = match.minute)
             }
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(6.dp)) // было 12.dp
             // Команды и счет
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -73,21 +74,24 @@ fun AnimatedMatchCard(
                 ) {
                     Text(
                         text = match.homeTeam.name,
-                        fontSize = 14.sp,
+                        fontSize = 12.sp, // было 14.sp
                         fontWeight = FontWeight.Medium,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
+                        maxLines = 1
                     )
                     if (match.homeTeam.shortName != null) {
                         Text(
                             text = match.homeTeam.shortName,
-                            fontSize = 10.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            fontSize = 9.sp, // было 10.sp
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1
                         )
                     }
                 }
                 ScoreStatic(
                     homeScore = match.homeScore,
-                    awayScore = match.awayScore
+                    awayScore = match.awayScore,
+                    compact = true // новый параметр
                 )
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -95,20 +99,22 @@ fun AnimatedMatchCard(
                 ) {
                     Text(
                         text = match.awayTeam.name,
-                        fontSize = 14.sp,
+                        fontSize = 12.sp, // было 14.sp
                         fontWeight = FontWeight.Medium,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
+                        maxLines = 1
                     )
                     if (match.awayTeam.shortName != null) {
                         Text(
                             text = match.awayTeam.shortName,
-                            fontSize = 10.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            fontSize = 9.sp, // было 10.sp
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1
                         )
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(6.dp)) // было 12.dp
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -116,12 +122,13 @@ fun AnimatedMatchCard(
             ) {
                 Text(
                     text = formatMatchTime(match.dateTime),
-                    fontSize = 12.sp,
+                    fontSize = 10.sp, // было 12.sp
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 FavoriteButtonStatic(
                     isFavorite = match.isFavorite,
-                    onClick = onFavoriteClick
+                    onClick = onFavoriteClick,
+                    compact = true // новый параметр
                 )
             }
         }
@@ -172,26 +179,26 @@ fun MatchStatusStatic(status: MatchStatus, minute: Int?) {
 }
 
 @Composable
-fun ScoreStatic(homeScore: Int, awayScore: Int) {
+fun ScoreStatic(homeScore: Int, awayScore: Int, compact: Boolean = false) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(if (compact) 4.dp else 8.dp)
     ) {
         Text(
             text = homeScore.toString(),
-            fontSize = 24.sp,
+            fontSize = if (compact) 16.sp else 24.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.primary
         )
         Text(
             text = "-",
-            fontSize = 18.sp,
+            fontSize = if (compact) 12.sp else 18.sp,
             fontWeight = FontWeight.Medium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Text(
             text = awayScore.toString(),
-            fontSize = 24.sp,
+            fontSize = if (compact) 16.sp else 24.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.primary
         )
@@ -199,8 +206,8 @@ fun ScoreStatic(homeScore: Int, awayScore: Int) {
 }
 
 @Composable
-fun FavoriteButtonStatic(isFavorite: Boolean, onClick: () -> Unit) {
-    IconButton(onClick = onClick) {
+fun FavoriteButtonStatic(isFavorite: Boolean, onClick: () -> Unit, compact: Boolean = false) {
+    IconButton(onClick = onClick, modifier = Modifier.size(if (compact) 28.dp else 40.dp)) {
         Icon(
             imageVector = if (isFavorite) {
                 Icons.Default.Favorite
@@ -212,7 +219,8 @@ fun FavoriteButtonStatic(isFavorite: Boolean, onClick: () -> Unit) {
                 MaterialTheme.colorScheme.error
             } else {
                 MaterialTheme.colorScheme.onSurfaceVariant
-            }
+            },
+            modifier = Modifier.size(if (compact) 16.dp else 24.dp)
         )
     }
 }
