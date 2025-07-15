@@ -40,6 +40,7 @@ import com.example.livekick.presentation.viewmodel.HomeViewModel
 import com.example.livekick.presentation.viewmodel.HomeViewModelFactory
 import com.example.livekick.ui.theme.LocalThemeManager
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.material.icons.filled.Search
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -60,128 +61,207 @@ fun HomeScreen(
     val selectedLeague by viewModel.selectedLeague.collectAsState()
     val selectedDate by viewModel.selectedDate.collectAsState()
     val availableLeagues by viewModel.availableLeagues.collectAsState()
-    
+    var showSearch by remember { mutableStateOf(false) }
     val themeManager = LocalThemeManager.current
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .statusBarsPadding()
-            .padding(horizontal = 16.dp)
-    ) {
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = "LiveKick",
-            fontSize = 32.sp,
-            fontWeight = FontWeight.Black,
-            color = MaterialTheme.colorScheme.primary,
-            letterSpacing = 2.sp,
-            style = MaterialTheme.typography.headlineLarge.copy(
-                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
-                // .shadow(...) — убрано для совместимости
-            ),
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
             modifier = Modifier
-                .align(Alignment.Start)
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        // Поиск и фильтры
-        SearchAndFilterBar(
-            searchQuery = searchQuery,
-            onSearchQueryChange = viewModel::onSearchQueryChange,
-            selectedStatus = selectedStatus,
-            onStatusFilterChange = viewModel::onStatusFilterChange,
-            selectedLeague = selectedLeague,
-            onLeagueFilterChange = viewModel::onLeagueFilterChange,
-            selectedDate = selectedDate,
-            onDateFilterChange = viewModel::onDateFilterChange,
-            availableLeagues = availableLeagues
-        )
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        // Содержимое
-        when {
-            uiState.isLoading -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        LottieLoadingIndicator(
-                            modifier = Modifier.size(140.dp)
-                        )
-                        Text(
-                            text = "Загрузка матчей...",
-                            fontSize = 16.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .statusBarsPadding()
+                .padding(horizontal = 16.dp)
+        ) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "LiveKick",
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.Black,
+                    color = MaterialTheme.colorScheme.primary,
+                    letterSpacing = 2.sp,
+                    style = MaterialTheme.typography.headlineLarge.copy(
+                        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                    ),
+                    modifier = Modifier.weight(1f)
+                )
+                IconButton(onClick = { showSearch = true }) {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Поиск",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(28.dp)
+                    )
                 }
             }
-            
-            uiState.error != null -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Warning,
-                            contentDescription = null,
-                            modifier = Modifier.size(48.dp),
-                            tint = MaterialTheme.colorScheme.error
-                        )
-                        Text(
-                            text = uiState.error!!,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.error,
-                            textAlign = TextAlign.Center
-                        )
-                        Button(
-                            onClick = { viewModel.onRefresh() }
-                        ) {
-                            Text("Повторить")
-                        }
-                    }
-                }
-            }
-            
-            else -> {
-                val matches = if (showLiveOnly) {
-                    uiState.matches.filter { it.status == MatchStatus.LIVE }
-                } else {
-                    uiState.matches
-                }
-                if (matches.isEmpty()) {
+            Spacer(modifier = Modifier.height(8.dp))
+            // Фильтры (без поиска)
+            SearchAndFilterBar(
+                searchQuery = "", // скрываем строку поиска
+                onSearchQueryChange = {},
+                selectedStatus = selectedStatus,
+                onStatusFilterChange = viewModel::onStatusFilterChange,
+                selectedLeague = selectedLeague,
+                onLeagueFilterChange = viewModel::onLeagueFilterChange,
+                selectedDate = selectedDate,
+                onDateFilterChange = viewModel::onDateFilterChange,
+                availableLeagues = availableLeagues
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            // Содержимое (оставить как есть)
+            when {
+                uiState.isLoading -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = if (showLiveOnly) "Нет live-матчей" else "Нет матчей",
-                            fontSize = 18.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                } else {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        items(matches) { match ->
-                            AnimatedMatchCard(
-                                match = match,
-                                onMatchClick = { onNavigateToMatch(match.id) },
-                                onFavoriteClick = { viewModel.onToggleFavorite(match) },
-                                isVisible = true
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            LottieLoadingIndicator(
+                                modifier = Modifier.size(140.dp)
                             )
+                            Text(
+                                text = "Загрузка матчей...",
+                                fontSize = 16.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+                
+                uiState.error != null -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Warning,
+                                contentDescription = null,
+                                modifier = Modifier.size(48.dp),
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                            Text(
+                                text = uiState.error!!,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.error,
+                                textAlign = TextAlign.Center
+                            )
+                            Button(
+                                onClick = { viewModel.onRefresh() }
+                            ) {
+                                Text("Повторить")
+                            }
+                        }
+                    }
+                }
+                
+                else -> {
+                    val matches = if (showLiveOnly) {
+                        uiState.matches.filter { it.status == MatchStatus.LIVE }
+                    } else {
+                        uiState.matches
+                    }
+                    if (matches.isEmpty()) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = if (showLiveOnly) "Нет live-матчей" else "Нет матчей",
+                                fontSize = 18.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            items(matches) { match ->
+                                AnimatedMatchCard(
+                                    match = match,
+                                    onMatchClick = { onNavigateToMatch(match.id) },
+                                    onFavoriteClick = { viewModel.onToggleFavorite(match) },
+                                    isVisible = true
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        // --- Полноэкранный поиск ---
+        if (showSearch) {
+            Surface(
+                color = MaterialTheme.colorScheme.background.copy(alpha = 0.98f),
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(top = 32.dp, start = 16.dp, end = 16.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        OutlinedTextField(
+                            value = searchQuery,
+                            onValueChange = viewModel::onSearchQueryChange,
+                            modifier = Modifier.weight(1f),
+                            placeholder = { Text("Поиск...") },
+                            singleLine = true
+                        )
+                        IconButton(onClick = { showSearch = false }) {
+                            Icon(
+                                imageVector = Icons.Default.ArrowBack,
+                                contentDescription = "Назад",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    // Список результатов поиска (тот же список матчей, что и на главном)
+                    val matches = if (showLiveOnly) {
+                        uiState.matches.filter { it.status == MatchStatus.LIVE }
+                    } else {
+                        uiState.matches
+                    }
+                    if (matches.isEmpty()) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = if (showLiveOnly) "Нет live-матчей" else "Нет матчей",
+                                fontSize = 18.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            items(matches) { match ->
+                                AnimatedMatchCard(
+                                    match = match,
+                                    onMatchClick = { onNavigateToMatch(match.id) },
+                                    onFavoriteClick = { viewModel.onToggleFavorite(match) },
+                                    isVisible = true
+                                )
+                            }
                         }
                     }
                 }
