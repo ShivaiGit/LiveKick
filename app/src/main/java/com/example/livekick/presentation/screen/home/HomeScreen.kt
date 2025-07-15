@@ -26,6 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.livekick.data.repository.MatchRepositoryImpl
 import com.example.livekick.domain.model.Match
@@ -66,8 +67,23 @@ fun HomeScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(16.dp)
+            .padding(horizontal = 16.dp)
     ) {
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "LiveKick",
+            fontSize = 32.sp,
+            fontWeight = FontWeight.Black,
+            color = MaterialTheme.colorScheme.primary,
+            letterSpacing = 2.sp,
+            style = MaterialTheme.typography.headlineLarge.copy(
+                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                // .shadow(...) — убрано для совместимости
+            ),
+            modifier = Modifier
+                .align(Alignment.Start)
+        )
+        Spacer(modifier = Modifier.height(8.dp))
         // Поиск и фильтры
         SearchAndFilterBar(
             searchQuery = searchQuery,
