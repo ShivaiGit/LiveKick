@@ -35,185 +35,156 @@ fun AnimatedMatchCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
+            .heightIn(min = 48.dp)
             .clickable { onMatchClick() }
             .border(
                 width = 1.dp,
-                color = MaterialTheme.colorScheme.outline,
-                shape = RoundedCornerShape(12.dp)
+                color = MaterialTheme.colorScheme.outlineVariant,
+                shape = RoundedCornerShape(8.dp)
             ),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = 2.dp // уменьшено
+            defaultElevation = 0.dp
         ),
-        shape = RoundedCornerShape(12.dp), // уменьшено
+        shape = RoundedCornerShape(8.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         )
     ) {
-        Column(
-            modifier = Modifier.padding(8.dp) // было 16.dp
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            // Заголовок с лигой
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = match.league.name,
-                    fontSize = 10.sp, // было 12.sp
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Medium,
-                    maxLines = 1
-                )
-                MatchStatusStatic(status = match.status, minute = match.minute)
-            }
-            Spacer(modifier = Modifier.height(6.dp)) // было 12.dp
-            // Команды и счет
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(
-                        text = match.homeTeam.name,
-                        fontSize = 12.sp, // было 14.sp
-                        fontWeight = FontWeight.Medium,
-                        textAlign = TextAlign.Center,
-                        maxLines = 1
-                    )
-                    if (match.homeTeam.shortName != null) {
-                        Text(
-                            text = match.homeTeam.shortName,
-                            fontSize = 9.sp, // было 10.sp
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1
-                        )
-                    }
-                }
-                ScoreStatic(
-                    homeScore = match.homeScore,
-                    awayScore = match.awayScore,
-                    compact = true // новый параметр
-                )
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(
-                        text = match.awayTeam.name,
-                        fontSize = 12.sp, // было 14.sp
-                        fontWeight = FontWeight.Medium,
-                        textAlign = TextAlign.Center,
-                        maxLines = 1
-                    )
-                    if (match.awayTeam.shortName != null) {
-                        Text(
-                            text = match.awayTeam.shortName,
-                            fontSize = 9.sp, // было 10.sp
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1
-                        )
-                    }
-                }
-            }
-            Spacer(modifier = Modifier.height(6.dp)) // было 12.dp
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            // Время и статус
+            Column(
+                horizontalAlignment = Alignment.Start,
+                modifier = Modifier.widthIn(min = 44.dp)
             ) {
                 Text(
                     text = formatMatchTime(match.dateTime),
-                    fontSize = 10.sp, // было 12.sp
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    fontSize = 11.sp,
+                    color = MaterialTheme.colorScheme.outline,
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 1
                 )
-                FavoriteButtonStatic(
-                    isFavorite = match.isFavorite,
-                    onClick = onFavoriteClick,
-                    compact = true // новый параметр
-                )
+                Spacer(modifier = Modifier.height(2.dp))
+                MatchStatusMaterial(status = match.status, minute = match.minute)
             }
+            // Команды и счет
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = match.homeTeam.shortName,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(1f),
+                maxLines = 1,
+                textAlign = TextAlign.End
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            ScoreMaterial(
+                homeScore = match.homeScore,
+                awayScore = match.awayScore,
+                status = match.status
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+                text = match.awayTeam.shortName,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(1f),
+                maxLines = 1,
+                textAlign = TextAlign.Start
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            // Избранное
+            FavoriteButtonStatic(
+                isFavorite = match.isFavorite,
+                onClick = onFavoriteClick,
+                compact = true,
+                modifier = Modifier.size(28.dp)
+            )
         }
     }
 }
 
 @Composable
-fun MatchStatusStatic(status: MatchStatus, minute: Int?) {
-    val (backgroundColor, textColor, text) = when (status) {
+fun MatchStatusMaterial(status: MatchStatus, minute: Int?) {
+    val (bg, fg, text) = when (status) {
         MatchStatus.LIVE -> Triple(
-            MaterialTheme.colorScheme.errorContainer,
-            MaterialTheme.colorScheme.onErrorContainer,
-            "LIVE ${minute ?: 0}'"
+            MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+            MaterialTheme.colorScheme.primary,
+            "LIVE${if (minute != null) " ${minute}'" else ""}"
         )
         MatchStatus.FINISHED -> Triple(
-            MaterialTheme.colorScheme.surfaceVariant,
-            MaterialTheme.colorScheme.onSurfaceVariant,
-            "ЗАВЕРШЕН"
+            MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f),
+            MaterialTheme.colorScheme.secondary,
+            "Завершён"
         )
         MatchStatus.SCHEDULED -> Triple(
-            MaterialTheme.colorScheme.primaryContainer,
-            MaterialTheme.colorScheme.onPrimaryContainer,
-            "ЗАПЛАНИРОВАН"
+            MaterialTheme.colorScheme.tertiary.copy(alpha = 0.12f),
+            MaterialTheme.colorScheme.tertiary,
+            "Скоро"
         )
-        MatchStatus.POSTPONED -> Triple(
-            MaterialTheme.colorScheme.tertiaryContainer,
-            MaterialTheme.colorScheme.onTertiaryContainer,
-            "ОТЛОЖЕН"
-        )
-        MatchStatus.CANCELLED -> Triple(
-            MaterialTheme.colorScheme.errorContainer,
-            MaterialTheme.colorScheme.onErrorContainer,
-            "ОТМЕНЕН"
+        MatchStatus.POSTPONED, MatchStatus.CANCELLED -> Triple(
+            MaterialTheme.colorScheme.outlineVariant,
+            MaterialTheme.colorScheme.outline,
+            "—"
         )
     }
     Surface(
-        color = backgroundColor,
-        shape = RoundedCornerShape(12.dp)
+        color = bg,
+        shape = RoundedCornerShape(6.dp)
     ) {
         Text(
             text = text,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            color = fg,
             fontSize = 10.sp,
             fontWeight = FontWeight.Medium,
-            color = textColor
+            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+            maxLines = 1
         )
     }
 }
 
 @Composable
-fun ScoreStatic(homeScore: Int, awayScore: Int, compact: Boolean = false) {
+fun ScoreMaterial(homeScore: Int, awayScore: Int, status: MatchStatus) {
+    val color = when (status) {
+        MatchStatus.LIVE -> MaterialTheme.colorScheme.primary
+        MatchStatus.FINISHED -> MaterialTheme.colorScheme.secondary
+        MatchStatus.SCHEDULED -> MaterialTheme.colorScheme.tertiary
+        else -> MaterialTheme.colorScheme.onSurface
+    }
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(if (compact) 4.dp else 8.dp)
+        horizontalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         Text(
             text = homeScore.toString(),
-            fontSize = if (compact) 16.sp else 24.sp,
+            fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary
+            color = color
         )
         Text(
             text = "-",
-            fontSize = if (compact) 12.sp else 18.sp,
+            fontSize = 13.sp,
             fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.outline
         )
         Text(
             text = awayScore.toString(),
-            fontSize = if (compact) 16.sp else 24.sp,
+            fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary
+            color = color
         )
     }
 }
 
 @Composable
-fun FavoriteButtonStatic(isFavorite: Boolean, onClick: () -> Unit, compact: Boolean = false) {
-    IconButton(onClick = onClick, modifier = Modifier.size(if (compact) 28.dp else 40.dp)) {
+fun FavoriteButtonStatic(isFavorite: Boolean, onClick: () -> Unit, compact: Boolean = false, modifier: Modifier = Modifier) {
+    IconButton(onClick = onClick, modifier = modifier) {
         Icon(
             imageVector = if (isFavorite) {
                 Icons.Default.Favorite
@@ -221,11 +192,7 @@ fun FavoriteButtonStatic(isFavorite: Boolean, onClick: () -> Unit, compact: Bool
                 Icons.Default.FavoriteBorder
             },
             contentDescription = "Избранное",
-            tint = if (isFavorite) {
-                MaterialTheme.colorScheme.error
-            } else {
-                MaterialTheme.colorScheme.onSurfaceVariant
-            },
+            tint = if (isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
             modifier = Modifier.size(if (compact) 16.dp else 24.dp)
         )
     }
