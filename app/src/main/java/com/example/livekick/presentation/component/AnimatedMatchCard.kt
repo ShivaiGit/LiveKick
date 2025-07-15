@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.livekick.domain.model.*
 import kotlinx.coroutines.delay
+import androidx.compose.foundation.border
 
 @Composable
 fun AnimatedMatchCard(
@@ -34,7 +35,12 @@ fun AnimatedMatchCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .clickable { onMatchClick() },
+            .clickable { onMatchClick() }
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.outline,
+                shape = RoundedCornerShape(12.dp)
+            ),
         elevation = CardDefaults.cardElevation(
             defaultElevation = 2.dp // уменьшено
         ),
