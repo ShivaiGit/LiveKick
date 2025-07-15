@@ -48,25 +48,6 @@ fun LiveKickApp(matchRepository: MatchRepositoryImpl) {
                 color = MaterialTheme.colorScheme.background
             ) {
                 Column(modifier = Modifier.fillMaxSize()) {
-                    // Верхнее название
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 12.dp, bottom = 4.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "LiveKick",
-                            style = MaterialTheme.typography.headlineMedium.copy(
-                                fontWeight = FontWeight.ExtraBold,
-                                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
-                                letterSpacing = 4.sp
-                            ),
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier
-                                .padding(horizontal = 8.dp)
-                        )
-                    }
                     // Контент с навигацией
                     Box(modifier = Modifier.weight(1f)) {
                         NavGraph(
