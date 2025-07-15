@@ -49,50 +49,7 @@ fun SearchAndFilterBar(
             )
             .padding(8.dp)
     ) {
-        // Поисковая строка
-        OutlinedTextField(
-            value = searchQuery,
-            onValueChange = onSearchQueryChange,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(40.dp),
-            placeholder = {
-                Text(
-                    text = "Поиск...",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontSize = MaterialTheme.typography.bodyMedium.fontSize
-                )
-            },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = "Поиск",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(18.dp)
-                )
-            },
-            trailingIcon = {
-                if (searchQuery.isNotEmpty()) {
-                    IconButton(onClick = { onSearchQueryChange("") }) {
-                        Icon(
-                            imageVector = Icons.Default.Clear,
-                            contentDescription = "Очистить",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
-                }
-            },
-            singleLine = true,
-            keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(imeAction = ImeAction.Search),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                focusedContainerColor = MaterialTheme.colorScheme.surface,
-                unfocusedContainerColor = MaterialTheme.colorScheme.surface
-            ),
-            shape = RoundedCornerShape(8.dp)
-        )
+        // Поисковая строка полностью удалена, остались только фильтры
         Spacer(modifier = Modifier.height(4.dp))
         // Фильтры — компактная строка
         Row(
@@ -118,7 +75,14 @@ fun SearchAndFilterBar(
             FilterChip(
                 selected = selectedStatus != null,
                 onClick = { onStatusFilterChange(if (selectedStatus == null) MatchStatus.LIVE else null) },
-                label = { Text(selectedStatus?.let { status -> when(status) { MatchStatus.LIVE -> "Live"; MatchStatus.SCHEDULED -> "Будет"; MatchStatus.FINISHED -> "Завершён" } } ?: "Статус") },
+                label = { Text(selectedStatus?.let { status ->
+                    when(status) {
+                        MatchStatus.LIVE -> "Live"
+                        MatchStatus.SCHEDULED -> "Будет"
+                        MatchStatus.FINISHED -> "Завершён"
+                        else -> status.name
+                    }
+                } ?: "Статус") },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Tune,
